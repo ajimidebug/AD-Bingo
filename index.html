@@ -42,7 +42,7 @@
 
 body {
   background: var(--bg);
-  font-family: "Nunito", "Noto Sans SC", sans-serif;
+  font-family: "Nunito","Noto Sans SC",sans-serif;
   min-height: 100vh;
   display: flex; flex-direction: column; align-items: center;
   padding: 24px 16px 60px;
@@ -57,13 +57,19 @@ body {
   margin-bottom: 16px;
   opacity: 0; animation: up .45s ease forwards;
 }
-.header-left .title {
+.header-left { flex: 1; min-width: 0; }
+.title {
   font-size: 1.55rem; font-weight: 900;
   font-family: "PingFang SC","苹方","Noto Sans SC","Microsoft YaHei",sans-serif;
   color: var(--text); letter-spacing: 0.02em;
+  cursor: pointer; display: inline-block;
+  border-radius: 8px; padding: 2px 6px; margin-left: -6px;
+  transition: background 0.2s;
 }
-.header-left .date { font-size: 0.73rem; font-weight: 600; color: var(--text-lt); margin-top: 2px; }
-.header-right { display: flex; gap: 8px; align-items: center; }
+.title:hover { background: var(--purple-lt); }
+.title-hint { font-size: 0.62rem; color: var(--text-lt); font-weight: 600; margin-top: 1px; margin-left: 2px; }
+.date { font-size: 0.73rem; font-weight: 600; color: var(--text-lt); margin-top: 2px; }
+.header-right { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 .btn-icon {
   width: 42px; height: 42px; border-radius: 50%;
   background: var(--surface); border: none; cursor: pointer;
@@ -71,6 +77,16 @@ body {
   font-size: 1.1rem; box-shadow: var(--shadow); transition: transform 0.2s;
 }
 .btn-icon:hover { transform: scale(1.08); }
+
+/* ── Title edit inline ── */
+.title-input {
+  font-size: 1.55rem; font-weight: 900;
+  font-family: "PingFang SC","苹方","Noto Sans SC","Microsoft YaHei",sans-serif;
+  color: var(--text); letter-spacing: 0.02em;
+  background: var(--purple-lt); border: 2px solid var(--purple);
+  border-radius: 8px; padding: 2px 8px; outline: none;
+  width: 100%; max-width: 220px;
+}
 
 /* ── Progress card ── */
 .progress-card {
@@ -85,11 +101,11 @@ body {
 .progress-card-sub { font-size: 0.72rem; font-weight: 600; color: var(--text-lt); margin-top: 2px; }
 .ring-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
 .ring-wrap svg { transform: rotate(-90deg); display: block; }
-.ring-bg  { fill: none; stroke: var(--purple-lt); stroke-width: 5; }
+.ring-bg   { fill: none; stroke: var(--purple-lt); stroke-width: 5; }
 .ring-fill { fill: none; stroke: var(--purple); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .65s cubic-bezier(.4,0,.2,1); }
 .ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 900; color: var(--purple); }
 .progress-bar-bg { height: 8px; background: var(--purple-lt); border-radius: 99px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #c3b1e1, var(--blue), var(--green)); border-radius: 99px; transition: width .65s cubic-bezier(.4,0,.2,1); width: 0%; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg,#c3b1e1,var(--blue),var(--green)); border-radius: 99px; transition: width .65s cubic-bezier(.4,0,.2,1); width: 0%; }
 .progress-hint { font-size: 0.7rem; font-weight: 700; color: var(--text-mid); margin-top: 8px; min-height: 1.3em; }
 
 /* ── Badge ── */
@@ -99,7 +115,8 @@ body {
 
 /* ── Grid ── */
 .grid-card { width: 100%; max-width: 400px; background: var(--surface); border-radius: 20px; padding: 14px; box-shadow: var(--shadow); opacity: 0; animation: up .45s .17s ease forwards; }
-.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
+
 .cell {
   aspect-ratio: 1/1; background: var(--bg); border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -110,25 +127,47 @@ body {
   -webkit-tap-highlight-color: transparent;
   border: 2px solid transparent;
   transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
-  word-break: break-all; color: var(--text-mid); position: relative;
-  overflow: hidden;
+  word-break: break-all; color: var(--text-mid); position: relative; overflow: hidden;
 }
 .cell:hover { transform: translateY(-1px); }
-.cell:active { transform: scale(0.9); }
+.cell:active { transform: scale(0.92); }
+.cell.pressing { transform: scale(0.9); opacity: 0.7; }
+
+/* completed */
 .cell.active { background: var(--blue) !important; color: #fff !important; border-color: var(--blue-dk); box-shadow: 0 4px 12px rgba(126,184,247,0.45); }
 .cell.active::after { content:'✓'; position:absolute; top:2px; right:4px; font-size:0.5rem; opacity:0.75; }
+
+/* bingo line */
 .cell.bingo-line { background: var(--green) !important; color: #fff !important; border-color: var(--green-dk); box-shadow: 0 4px 14px rgba(125,207,170,0.45); }
 .cell.bingo-line::after { content:'★'; position:absolute; top:2px; right:3px; font-size:0.48rem; opacity:0.85; }
-/* note indicator dot */
+
+/* mandatory */
+.cell.mandatory { border-color: var(--coral) !important; box-shadow: 0 0 0 1px var(--coral-lt); }
+.cell.mandatory .lock-icon { position:absolute; top:2px; left:3px; font-size:0.5rem; opacity:0.8; }
+
+/* locked by mandatory */
+.cell.locked {
+  background: #e8eaed !important; color: #b0b8c4 !important;
+  border-color: transparent !important; cursor: not-allowed;
+  box-shadow: none !important;
+}
+.cell.locked::before {
+  content: '🔒'; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 1rem; opacity: 0.35;
+}
+.cell.locked .cell-text { opacity: 0.4; }
+
+/* note dot */
 .cell .note-dot {
   position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
   width: 4px; height: 4px; border-radius: 50%;
-  background: currentColor; opacity: 0.45;
-  display: none;
+  background: currentColor; opacity: 0.45; display: none;
 }
 .cell .note-dot.show { display: block; }
-/* press ripple */
-.cell.pressing { transform: scale(0.93); opacity: 0.75; }
+
+/* ── Particle canvas overlay ── */
+#particle-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
 
 /* ── Bottom buttons ── */
 .bottom { width: 100%; max-width: 400px; display: flex; gap: 10px; margin-top: 14px; opacity: 0; animation: up .45s .22s ease forwards; }
@@ -139,19 +178,10 @@ body {
 .btn-reset { background: var(--coral-lt); color: #c05040; }
 .btn-reset:hover { background: #faddcf; }
 
-/* ── Shared overlay/drawer base ── */
-.overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.32);
-  z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.28s;
-}
+/* ── Overlay / Sheet ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.32); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.28s; }
 .overlay.open { opacity: 1; pointer-events: all; }
-.sheet {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--surface); border-radius: 24px 24px 0 0;
-  z-index: 201; transform: translateY(100%);
-  transition: transform 0.36s cubic-bezier(.4,0,.2,1);
-  max-height: 88vh; display: flex; flex-direction: column;
-}
+.sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-radius: 24px 24px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.36s cubic-bezier(.4,0,.2,1); max-height: 88vh; display: flex; flex-direction: column; }
 .sheet.open { transform: translateY(0); }
 .sheet-handle { width: 40px; height: 4px; background: var(--text-lt); border-radius: 99px; margin: 14px auto 0; flex-shrink: 0; }
 .sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 10px; flex-shrink: 0; }
@@ -161,118 +191,48 @@ body {
 /* ── Detail panel ── */
 #detailSheet { z-index: 202; }
 #detailOverlay { z-index: 201; }
-
 .detail-body { overflow-y: auto; padding: 0 16px 32px; flex: 1; }
 
-/* name editor */
-.detail-name-row {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg); border-radius: 14px;
-  padding: 12px 14px; margin-bottom: 14px;
-}
-.detail-name-input {
-  flex: 1; border: none; background: transparent; outline: none;
-  font-family: "PingFang SC","苹方","Noto Sans SC",sans-serif;
-  font-size: 1.05rem; font-weight: 800; color: var(--text);
-}
+.detail-name-row { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+.detail-name-input { flex: 1; border: none; background: transparent; outline: none; font-family: "PingFang SC","苹方","Noto Sans SC",sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--text); }
 .detail-name-label { font-size: 0.68rem; font-weight: 700; color: var(--text-lt); white-space: nowrap; }
 
-/* done toggle */
-.detail-done-row {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--bg); border-radius: 14px; padding: 13px 16px; margin-bottom: 14px;
-}
-.detail-done-label { font-size: 0.88rem; font-weight: 800; color: var(--text); }
-.toggle-switch { position: relative; width: 48px; height: 28px; cursor: pointer; }
+.detail-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 14px; padding: 13px 16px; margin-bottom: 10px; }
+.detail-row-label { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+.detail-row-sub { font-size: 0.7rem; color: var(--text-lt); font-weight: 600; margin-top: 2px; }
+
+/* toggle switch */
+.toggle-switch { position: relative; width: 48px; height: 28px; cursor: pointer; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-track {
-  position: absolute; inset: 0; background: var(--text-lt); border-radius: 99px;
-  transition: background 0.25s;
-}
-.toggle-thumb {
-  position: absolute; top: 3px; left: 3px;
-  width: 22px; height: 22px; background: #fff; border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  transition: transform 0.25s cubic-bezier(.4,0,.2,1);
-}
+.toggle-track { position: absolute; inset: 0; background: var(--text-lt); border-radius: 99px; transition: background 0.25s; }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.18); transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
 .toggle-switch input:checked + .toggle-track { background: var(--green); }
 .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(20px); }
+.toggle-switch.mandatory-toggle input:checked + .toggle-track { background: var(--coral); }
 
-/* section labels */
-.detail-section-label {
-  font-size: 0.7rem; font-weight: 800; color: var(--text-lt);
-  text-transform: uppercase; letter-spacing: 0.07em;
-  margin-bottom: 8px; margin-top: 2px;
-}
+.detail-section-label { font-size: 0.7rem; font-weight: 800; color: var(--text-lt); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; margin-top: 2px; }
 
-/* notes */
-.detail-notes {
-  width: 100%; min-height: 80px; padding: 12px 14px;
-  background: var(--bg); border: 2px solid transparent; border-radius: 14px;
-  font-family: "Noto Sans SC",sans-serif; font-size: 0.85rem;
-  font-weight: 400; color: var(--text); resize: none; outline: none;
-  transition: border-color 0.2s; line-height: 1.6; margin-bottom: 14px;
-}
+.detail-notes { width: 100%; min-height: 80px; padding: 12px 14px; background: var(--bg); border: 2px solid transparent; border-radius: 14px; font-family: "Noto Sans SC",sans-serif; font-size: 0.85rem; font-weight: 400; color: var(--text); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6; margin-bottom: 14px; }
 .detail-notes:focus { border-color: var(--purple-lt); }
 .detail-notes::placeholder { color: var(--text-lt); }
 
-/* todo list */
 .todo-list { margin-bottom: 8px; }
-.todo-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; background: var(--bg);
-  border-radius: 11px; margin-bottom: 6px;
-}
-.todo-check {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--text-lt); background: transparent;
-  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; font-size: 0.65rem; color: transparent;
-}
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 11px; margin-bottom: 6px; }
+.todo-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-lt); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.65rem; color: transparent; }
 .todo-item.done .todo-check { background: var(--green); border-color: var(--green-dk); color: #fff; }
-.todo-item.done .todo-check::after { content: '✓'; }
-.todo-text {
-  flex: 1; font-size: 0.85rem; font-weight: 600; color: var(--text);
-  background: transparent; border: none; outline: none;
-  font-family: "Noto Sans SC",sans-serif;
-  transition: color 0.2s, text-decoration 0.2s;
-}
+.todo-item.done .todo-check::after { content:'✓'; }
+.todo-text { flex: 1; font-size: 0.85rem; font-weight: 600; color: var(--text); background: transparent; border: none; outline: none; font-family: "Noto Sans SC",sans-serif; transition: color 0.2s; }
 .todo-item.done .todo-text { color: var(--text-lt); text-decoration: line-through; }
-.todo-delete {
-  width: 24px; height: 24px; border-radius: 50%; border: none;
-  background: transparent; cursor: pointer; color: var(--text-lt);
-  font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
-  transition: color 0.18s, background 0.18s;
-}
+.todo-delete { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; cursor: pointer; color: var(--text-lt); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; transition: color 0.18s, background 0.18s; }
 .todo-delete:hover { background: var(--coral-lt); color: var(--coral); }
-
-.todo-add-row {
-  display: flex; align-items: center; gap: 8px; margin-top: 4px;
-}
-.todo-add-input {
-  flex: 1; padding: 10px 12px; background: var(--bg);
-  border: 2px solid transparent; border-radius: 11px; outline: none;
-  font-family: "Noto Sans SC",sans-serif; font-size: 0.85rem;
-  color: var(--text); transition: border-color 0.2s;
-}
+.todo-add-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.todo-add-input { flex: 1; padding: 10px 12px; background: var(--bg); border: 2px solid transparent; border-radius: 11px; outline: none; font-family: "Noto Sans SC",sans-serif; font-size: 0.85rem; color: var(--text); transition: border-color 0.2s; }
 .todo-add-input:focus { border-color: var(--purple-lt); }
 .todo-add-input::placeholder { color: var(--text-lt); }
-.todo-add-btn {
-  width: 38px; height: 38px; border-radius: 10px; border: none;
-  background: var(--purple); color: #fff; font-size: 1.2rem;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.18s; flex-shrink: 0;
-}
+.todo-add-btn { width: 38px; height: 38px; border-radius: 10px; border: none; background: var(--purple); color: #fff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.18s; flex-shrink: 0; }
 .todo-add-btn:hover { background: #9b80d0; }
 
-/* save button */
-.detail-save-btn {
-  width: 100%; padding: 14px; border-radius: 14px; border: none;
-  background: var(--purple); color: #fff;
-  font-family: "Nunito","Noto Sans SC",sans-serif;
-  font-size: 0.88rem; font-weight: 900; cursor: pointer;
-  margin-top: 18px; transition: background 0.18s;
-}
+.detail-save-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; background: var(--purple); color: #fff; font-family: "Nunito","Noto Sans SC",sans-serif; font-size: 0.88rem; font-weight: 900; cursor: pointer; margin-top: 18px; transition: background 0.18s; }
 .detail-save-btn:hover { background: #9b80d0; }
 .detail-save-btn:active { transform: scale(0.97); }
 
@@ -288,46 +248,47 @@ body {
 .history-pct { font-size: 0.85rem; font-weight: 900; color: var(--text); }
 .history-sub { font-size: 0.68rem; font-weight: 600; color: var(--text-mid); margin-top: 2px; }
 .history-bar-bg { height: 5px; background: var(--purple-lt); border-radius: 99px; margin-top: 6px; overflow: hidden; }
-.history-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--blue)); }
+.history-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--purple),var(--blue)); }
 .history-bingo { flex-shrink: 0; background: var(--amber-lt); border-radius: 99px; padding: 3px 10px; font-size: 0.65rem; font-weight: 800; color: var(--amber-dk); display: none; }
 .history-bingo.show { display: block; }
 
-/* ── Toast ── */
-.toast {
-  position: fixed; bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(70px);
-  background: var(--text); color: #fff;
-  padding: 12px 26px; border-radius: 99px;
-  font-size: 0.82rem; font-weight: 800;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
-  transition: transform .36s cubic-bezier(.4,0,.2,1), opacity .36s;
-  z-index: 999; white-space: nowrap; opacity: 0;
+/* ── Locked toast ── */
+.locked-toast {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0.85);
+  background: rgba(44,44,60,0.94); color: #fff;
+  padding: 16px 24px; border-radius: 18px;
+  font-size: 0.9rem; font-weight: 800; text-align: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  max-width: 260px; line-height: 1.5;
 }
+.locked-toast.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+
+/* ── Toast ── */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--text); color: #fff; padding: 12px 26px; border-radius: 99px; font-size: 0.82rem; font-weight: 800; box-shadow: 0 8px 28px rgba(0,0,0,0.22); transition: transform .36s cubic-bezier(.4,0,.2,1), opacity .36s; z-index: 999; white-space: nowrap; opacity: 0; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
-@keyframes up {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.2); }
-  70%  { transform: scale(0.94); }
-  100% { transform: scale(1); }
-}
-.pop { animation: pop 0.26s ease; }
+@keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.92)} 100%{transform:scale(1)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+.pop   { animation: pop   0.3s ease; }
+.shake { animation: shake 0.35s ease; }
 </style>
 </head>
 <body>
 
 <canvas id="confetti-canvas"></canvas>
+<canvas id="particle-canvas"></canvas>
 <div class="toast" id="toast"></div>
+<div class="locked-toast" id="lockedToast"></div>
 
-<!-- History overlay + sheet -->
+<!-- History -->
 <div class="overlay" id="historyOverlay" onclick="closeHistory()"></div>
-<div class="sheet" id="historySheet">
+<div class="sheet"   id="historySheet">
   <div class="sheet-handle"></div>
   <div class="sheet-header">
     <div class="sheet-title">📅 历史记录</div>
@@ -336,37 +297,42 @@ body {
   <div class="history-list" id="historyList"></div>
 </div>
 
-<!-- Detail overlay + sheet -->
+<!-- Detail panel -->
 <div class="overlay" id="detailOverlay" onclick="closeDetail()"></div>
-<div class="sheet" id="detailSheet">
+<div class="sheet"   id="detailSheet">
   <div class="sheet-handle"></div>
   <div class="sheet-header">
     <div class="sheet-title" id="detailSheetTitle">编辑格子</div>
     <button class="sheet-close" onclick="closeDetail()">✕</button>
   </div>
   <div class="detail-body">
-
-    <!-- Name editor -->
     <div class="detail-name-row">
       <input class="detail-name-input" id="detailNameInput" type="text" maxlength="10" placeholder="格子名称"/>
-      <span class="detail-name-label">长按修改名称</span>
+      <span class="detail-name-label">修改名称</span>
     </div>
-
-    <!-- Done toggle -->
-    <div class="detail-done-row">
-      <div class="detail-done-label">标记为今日完成</div>
+    <div class="detail-row">
+      <div>
+        <div class="detail-row-label">标记为今日完成</div>
+      </div>
       <label class="toggle-switch">
-        <input type="checkbox" id="detailDoneToggle" onchange="onDetailDoneChange()"/>
+        <input type="checkbox" id="detailDoneToggle"/>
         <div class="toggle-track"></div>
         <div class="toggle-thumb"></div>
       </label>
     </div>
-
-    <!-- Notes -->
+    <div class="detail-row">
+      <div>
+        <div class="detail-row-label">🔒 强制完成</div>
+        <div class="detail-row-sub">未完成时其他格子将被锁住</div>
+      </div>
+      <label class="toggle-switch mandatory-toggle">
+        <input type="checkbox" id="detailMandatoryToggle"/>
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
     <div class="detail-section-label">📝 备注</div>
     <textarea class="detail-notes" id="detailNotes" placeholder="记录今天做了什么、有什么感受…" rows="3"></textarea>
-
-    <!-- To-do list -->
     <div class="detail-section-label">✅ 子任务清单</div>
     <div class="todo-list" id="todoList"></div>
     <div class="todo-add-row">
@@ -374,7 +340,6 @@ body {
              onkeydown="if(event.key==='Enter') addTodo()"/>
       <button class="todo-add-btn" onclick="addTodo()">+</button>
     </div>
-
     <button class="detail-save-btn" onclick="saveDetail()">保存</button>
   </div>
 </div>
@@ -382,7 +347,7 @@ body {
 <!-- Header -->
 <div class="header">
   <div class="header-left">
-    <div class="title">ADHD Bingo</div>
+    <div id="titleDisplay" class="title" title="长按可修改名称">ADHD Bingo</div>
     <div class="date" id="dateDisplay"></div>
   </div>
   <div class="header-right">
@@ -390,7 +355,7 @@ body {
   </div>
 </div>
 
-<!-- Progress Card -->
+<!-- Progress -->
 <div class="progress-card">
   <div class="progress-card-header">
     <div>
@@ -400,8 +365,7 @@ body {
     <div class="ring-wrap">
       <svg width="60" height="60" viewBox="0 0 60 60">
         <circle class="ring-bg"   cx="30" cy="30" r="25"/>
-        <circle class="ring-fill" id="ringFill" cx="30" cy="30" r="25"
-          stroke-dasharray="157.08" stroke-dashoffset="157.08"/>
+        <circle class="ring-fill" id="ringFill" cx="30" cy="30" r="25" stroke-dasharray="157.08" stroke-dashoffset="157.08"/>
       </svg>
       <div class="ring-label" id="ringLabel">0%</div>
     </div>
@@ -434,445 +398,438 @@ const TASKS = [
   "倒垃圾","捡垃圾","洗碗","拖地","收衣服",
   "好睡眠","写手帐","写公众号","断舍离","采购食材"
 ];
-
 const PALETTES = [
-  { bg: '#e8f3fe', color: '#4a90d9' },
-  { bg: '#e4f7ef', color: '#4aaa80' },
-  { bg: '#fef6e4', color: '#c8882a' },
-  { bg: '#f0ebfa', color: '#7b5ea7' },
-  { bg: '#fde8ef', color: '#c0607a' },
-  { bg: '#fdeee9', color: '#c06040' },
+  {bg:'#e8f3fe',color:'#4a90d9'},{bg:'#e4f7ef',color:'#4aaa80'},
+  {bg:'#fef6e4',color:'#c8882a'},{bg:'#f0ebfa',color:'#7b5ea7'},
+  {bg:'#fde8ef',color:'#c0607a'},{bg:'#fdeee9',color:'#c06040'},
 ];
 
-const SIZE = 5;
-const CIRC = 157.08;
-const KEY_PREFIX   = 'adhd_bingo_';
-const KEY_CUSTOM   = 'adhd_bingo_custom_tasks';
-const KEY_DETAILS  = 'adhd_bingo_details'; // {taskIdx: {notes, todos:[{text,done}]}}
+const SIZE = 5, CIRC = 157.08;
+const KEY_PREFIX  = 'adhd_bingo_';
+const KEY_CUSTOM  = 'adhd_bingo_custom_tasks';
+const KEY_DETAILS = 'adhd_bingo_details';
+const KEY_MANDATORY = 'adhd_bingo_mandatory'; // Set of taskIdx
+const KEY_APPNAME = 'adhd_bingo_appname';
 
-let state       = Array(25).fill(false);
-let order       = [...Array(25).keys()];
-let prevLines   = 0;
-let customTasks = {};   // taskIdx -> custom name
-let details     = {};   // taskIdx -> { notes, todos }
+let state      = Array(25).fill(false);
+let order      = [...Array(25).keys()];
+let prevLines  = 0;
+let customTasks = {};
+let details     = {};
+let mandatory   = new Set(); // taskIdx values marked as mandatory
+let detailPos   = -1;
+let appName     = 'ADHD Bingo';
 
-let detailPos   = -1;   // grid position currently open in detail panel
-
-// ── Storage helpers ───────────────────────────────────────────────────────────
+// ── Storage ───────────────────────────────────────────────────────────────────
 function todayKey() { return KEY_PREFIX + new Date().toISOString().slice(0,10); }
-
 function load() {
   try {
     const s = localStorage.getItem(todayKey());
-    if (s) {
-      const d = JSON.parse(s);
-      if (Array.isArray(d.state)) state = d.state;
-      if (Array.isArray(d.order) && d.order.length === 25) order = d.order;
-    }
+    if (s) { const d=JSON.parse(s); if(Array.isArray(d.state)) state=d.state; if(Array.isArray(d.order)&&d.order.length===25) order=d.order; }
   } catch(e) {}
 }
 function save() {
   try {
-    const done = state.filter(Boolean).length;
-    const lines = getLines().length;
-    const pct = calcPct(done, lines);
-    localStorage.setItem(todayKey(), JSON.stringify({ state, order, done, lines, pct }));
+    const done=state.filter(Boolean).length, lines=getLines().length, pct=calcPct(done,lines);
+    localStorage.setItem(todayKey(), JSON.stringify({state,order,done,lines,pct}));
   } catch(e) {}
 }
-function loadCustomTasks() {
-  try { const s = localStorage.getItem(KEY_CUSTOM); if (s) customTasks = JSON.parse(s); } catch(e) {}
+function loadCustomTasks() { try { const s=localStorage.getItem(KEY_CUSTOM); if(s) customTasks=JSON.parse(s); } catch(e) {} }
+function saveCustomTasks() { try { localStorage.setItem(KEY_CUSTOM, JSON.stringify(customTasks)); } catch(e) {} }
+function loadDetails()     { try { const s=localStorage.getItem(KEY_DETAILS); if(s) details=JSON.parse(s); } catch(e) {} }
+function saveDetails()     { try { localStorage.setItem(KEY_DETAILS, JSON.stringify(details)); } catch(e) {} }
+function loadMandatory()   { try { const s=localStorage.getItem(KEY_MANDATORY); if(s) mandatory=new Set(JSON.parse(s)); } catch(e) {} }
+function saveMandatory()   { try { localStorage.setItem(KEY_MANDATORY, JSON.stringify([...mandatory])); } catch(e) {} }
+function loadAppName()     { try { const s=localStorage.getItem(KEY_APPNAME); if(s) { appName=s; document.getElementById('titleDisplay').textContent=s; document.title=s; } } catch(e) {} }
+function saveAppName(n)    { try { localStorage.setItem(KEY_APPNAME,n); } catch(e) {} }
+function getTaskName(idx)  { return customTasks[idx]!==undefined ? customTasks[idx] : TASKS[idx]; }
+function getDetail(idx)    { return details[idx] || {notes:'',todos:[]}; }
+function hasNoteOrTodo(idx){ const d=getDetail(idx); return d.notes.trim()!==''||(d.todos&&d.todos.length>0); }
+
+// ── Mandatory locked check ────────────────────────────────────────────────────
+function isMandatoryBlocking() {
+  // Returns the first incomplete mandatory task name, or null
+  for (let pos = 0; pos < 25; pos++) {
+    const taskIdx = order[pos];
+    if (mandatory.has(taskIdx) && !state[pos]) {
+      return getTaskName(taskIdx);
+    }
+  }
+  return null;
 }
-function saveCustomTasks() {
-  try { localStorage.setItem(KEY_CUSTOM, JSON.stringify(customTasks)); } catch(e) {}
-}
-function loadDetails() {
-  try { const s = localStorage.getItem(KEY_DETAILS); if (s) details = JSON.parse(s); } catch(e) {}
-}
-function saveDetails() {
-  try { localStorage.setItem(KEY_DETAILS, JSON.stringify(details)); } catch(e) {}
-}
-function getTaskName(taskIdx) {
-  return customTasks[taskIdx] !== undefined ? customTasks[taskIdx] : TASKS[taskIdx];
-}
-function getDetail(taskIdx) {
-  return details[taskIdx] || { notes: '', todos: [] };
-}
-function hasNoteOrTodo(taskIdx) {
-  const d = getDetail(taskIdx);
-  return d.notes.trim() !== '' || (d.todos && d.todos.length > 0);
+function isCellLocked(pos) {
+  const taskIdx = order[pos];
+  if (mandatory.has(taskIdx)) return false; // mandatory cells are never locked
+  return isMandatoryBlocking() !== null;
 }
 
-// ── Long press ────────────────────────────────────────────────────────────────
-let pressTimer   = null;
-let didLongPress = false;
+// ── Title long-press edit ─────────────────────────────────────────────────────
+let titlePressTimer = null;
+const titleEl = document.getElementById('titleDisplay');
 
+function startTitlePress() {
+  titlePressTimer = setTimeout(() => {
+    titlePressTimer = null;
+    beginTitleEdit();
+  }, 500);
+}
+function cancelTitlePress() { clearTimeout(titlePressTimer); titlePressTimer = null; }
+
+function beginTitleEdit() {
+  vibrate(30);
+  const input = document.createElement('input');
+  input.className = 'title-input';
+  input.value = appName;
+  input.maxLength = 20;
+  titleEl.replaceWith(input);
+  input.focus(); input.select();
+  function finish() {
+    const val = input.value.trim() || 'ADHD Bingo';
+    appName = val;
+    saveAppName(val);
+    document.title = val;
+    input.replaceWith(titleEl);
+    titleEl.textContent = val;
+  }
+  input.onblur = finish;
+  input.onkeydown = e => { if (e.key==='Enter') { e.preventDefault(); input.blur(); } if(e.key==='Escape') { input.value=appName; input.blur(); } };
+}
+
+titleEl.addEventListener('mousedown',  () => startTitlePress());
+titleEl.addEventListener('mouseup',    () => cancelTitlePress());
+titleEl.addEventListener('mouseleave', () => cancelTitlePress());
+titleEl.addEventListener('touchstart', (e) => { e.preventDefault(); startTitlePress(); }, {passive:false});
+titleEl.addEventListener('touchend',   () => cancelTitlePress());
+
+// ── Haptic ────────────────────────────────────────────────────────────────────
+function vibrate(ms) {
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch(e) {}
+}
+
+// ── Particle burst on cell complete ──────────────────────────────────────────
+function burstParticles(cellEl) {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const rect = cellEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top  + rect.height / 2;
+  const colors = ['#7eb8f7','#7dcfaa','#f7c97e','#f48fb1','#b39ddb','#f4967e','#fff'];
+  const ps = Array.from({length: 18}, () => {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2.5 + Math.random() * 4;
+    return {
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1.5,
+      r: 3 + Math.random() * 4,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      alpha: 1,
+    };
+  });
+  let f = 0;
+  (function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive = false;
+    ps.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.18;
+      p.alpha = Math.max(0, p.alpha - 0.045);
+      if (p.alpha > 0) alive = true;
+      ctx.save(); ctx.globalAlpha = p.alpha;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.color; ctx.fill();
+      ctx.restore();
+    });
+    f++;
+    if (alive && f < 80) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+// ── Long press on cell ────────────────────────────────────────────────────────
+let pressTimer = null, didLongPress = false;
 function startPress(pos, el) {
   didLongPress = false;
   el.classList.add('pressing');
   pressTimer = setTimeout(() => {
     didLongPress = true;
     el.classList.remove('pressing');
+    vibrate(40);
     openDetail(pos);
   }, 480);
 }
-function cancelPress(el) {
-  clearTimeout(pressTimer);
-  pressTimer = null;
-  el.classList.remove('pressing');
-}
+function cancelPress(el) { clearTimeout(pressTimer); pressTimer=null; el.classList.remove('pressing'); }
 
 // ── Detail panel ──────────────────────────────────────────────────────────────
 function openDetail(pos) {
   detailPos = pos;
   const taskIdx = order[pos];
   const d = getDetail(taskIdx);
-
   document.getElementById('detailSheetTitle').textContent = '✏️ ' + getTaskName(taskIdx);
   document.getElementById('detailNameInput').value = getTaskName(taskIdx);
   document.getElementById('detailDoneToggle').checked = state[pos];
-  document.getElementById('detailNotes').value = d.notes || '';
-  renderTodoList(d.todos || []);
-
+  document.getElementById('detailMandatoryToggle').checked = mandatory.has(taskIdx);
+  document.getElementById('detailNotes').value = d.notes||'';
+  renderTodoList(d.todos||[]);
   document.getElementById('detailOverlay').classList.add('open');
   document.getElementById('detailSheet').classList.add('open');
 }
-
 function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
   document.getElementById('detailSheet').classList.remove('open');
   detailPos = -1;
 }
-
-function onDetailDoneChange() {
-  // live preview — actual save happens on saveDetail
-}
-
 function renderTodoList(todos) {
   const list = document.getElementById('todoList');
   list.innerHTML = '';
-  todos.forEach((todo, i) => {
+  todos.forEach((todo,i) => {
     const item = document.createElement('div');
-    item.className = 'todo-item' + (todo.done ? ' done' : '');
+    item.className = 'todo-item'+(todo.done?' done':'');
     item.innerHTML = `
       <div class="todo-check" onclick="toggleTodoItem(${i})"></div>
-      <input class="todo-text" value="${escHtml(todo.text)}" placeholder="子任务"
-             oninput="updateTodoText(${i}, this.value)" maxlength="30"/>
-      <button class="todo-delete" onclick="deleteTodo(${i})">✕</button>
-    `;
+      <input class="todo-text" value="${escHtml(todo.text)}" placeholder="子任务" oninput="updateTodoText(${i},this.value)" maxlength="30"/>
+      <button class="todo-delete" onclick="deleteTodo(${i})">✕</button>`;
     list.appendChild(item);
   });
 }
-
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-
-function getCurrentTodos() {
-  const items = document.querySelectorAll('.todo-item');
-  return Array.from(items).map(item => ({
-    text: item.querySelector('.todo-text').value,
-    done: item.classList.contains('done'),
-  }));
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function getCurrentTodos(){ return Array.from(document.querySelectorAll('.todo-item')).map(el=>({text:el.querySelector('.todo-text').value,done:el.classList.contains('done')})); }
+function toggleTodoItem(i){ document.querySelectorAll('.todo-item')[i].classList.toggle('done'); }
+function updateTodoText(){}
+function deleteTodo(i){ const t=getCurrentTodos(); t.splice(i,1); renderTodoList(t); }
+function addTodo(){
+  const input=document.getElementById('todoAddInput');
+  const text=input.value.trim(); if(!text) return;
+  const todos=getCurrentTodos(); todos.push({text,done:false});
+  renderTodoList(todos); input.value=''; input.focus();
 }
-
-function toggleTodoItem(i) {
-  const items = document.querySelectorAll('.todo-item');
-  items[i].classList.toggle('done');
-}
-function updateTodoText(i, val) { /* stored on save */ }
-function deleteTodo(i) {
-  const todos = getCurrentTodos();
-  todos.splice(i, 1);
-  renderTodoList(todos);
-}
-function addTodo() {
-  const input = document.getElementById('todoAddInput');
-  const text = input.value.trim();
-  if (!text) return;
-  const todos = getCurrentTodos();
-  todos.push({ text, done: false });
-  renderTodoList(todos);
-  input.value = '';
-  input.focus();
-}
-
-function saveDetail() {
-  if (detailPos < 0) return;
+function saveDetail(){
+  if(detailPos<0) return;
   const taskIdx = order[detailPos];
-
-  // Save custom name
   const newName = document.getElementById('detailNameInput').value.trim();
-  if (newName && newName !== TASKS[taskIdx]) {
-    customTasks[taskIdx] = newName;
-  } else if (newName === TASKS[taskIdx]) {
-    delete customTasks[taskIdx];
-  }
+  if(newName && newName!==TASKS[taskIdx]) customTasks[taskIdx]=newName;
+  else if(newName===TASKS[taskIdx]) delete customTasks[taskIdx];
   saveCustomTasks();
 
-  // Save done state
   const isDone = document.getElementById('detailDoneToggle').checked;
-  if (state[detailPos] !== isDone) {
-    state[detailPos] = isDone;
-  }
+  const wasDone = state[detailPos];
+  state[detailPos] = isDone;
 
-  // Save notes + todos
+  const isMand = document.getElementById('detailMandatoryToggle').checked;
+  if(isMand) mandatory.add(taskIdx); else mandatory.delete(taskIdx);
+  saveMandatory();
+
   const notes = document.getElementById('detailNotes').value;
-  const todos  = getCurrentTodos();
-  details[taskIdx] = { notes, todos };
-  saveDetails();
-  save();
+  const todos = getCurrentTodos();
+  details[taskIdx] = {notes, todos};
+  saveDetails(); save();
 
-  // Update grid cell
+  // Update cell
   const cell = document.querySelector(`.cell[data-i="${detailPos}"]`);
-  if (cell) {
+  if(cell){
     cell.childNodes[0].textContent = getTaskName(taskIdx);
-    cell.classList.toggle('active', isDone);
-    if (isDone) { cell.style.background = ''; cell.style.color = ''; }
-    else        { cell.style.background = cell.dataset.bg; cell.style.color = cell.dataset.fg; }
     const dot = cell.querySelector('.note-dot');
-    if (dot) dot.classList.toggle('show', hasNoteOrTodo(taskIdx));
+    if(dot) dot.classList.toggle('show', hasNoteOrTodo(taskIdx));
   }
 
-  closeDetail();
-  render();
+  if(isDone && !wasDone) {
+    vibrate(60);
+    const c = document.querySelector(`.cell[data-i="${detailPos}"]`);
+    if(c) burstParticles(c);
+  }
+
+  closeDetail(); render(); buildGrid();
   showToast('已保存 ✓');
 }
 
 // ── History ───────────────────────────────────────────────────────────────────
-function getAllHistory() {
-  const entries = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (!key.startsWith(KEY_PREFIX) || key === KEY_CUSTOM || key === KEY_DETAILS) continue;
-    const dateStr = key.replace(KEY_PREFIX, '');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue;
-    try { entries.push({ dateStr, ...JSON.parse(localStorage.getItem(key)) }); } catch(e) {}
+function getAllHistory(){
+  const entries=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key.startsWith(KEY_PREFIX)||key===KEY_CUSTOM||key===KEY_DETAILS||key===KEY_MANDATORY||key===KEY_APPNAME) continue;
+    const dateStr=key.replace(KEY_PREFIX,'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue;
+    try { entries.push({dateStr,...JSON.parse(localStorage.getItem(key))}); } catch(e){}
   }
-  return entries.sort((a,b) => b.dateStr.localeCompare(a.dateStr));
+  return entries.sort((a,b)=>b.dateStr.localeCompare(a.dateStr));
 }
-
-function openHistory() {
-  const entries = getAllHistory();
-  const list = document.getElementById('historyList');
-  list.innerHTML = '';
-  if (entries.length === 0) {
-    list.innerHTML = '<div class="history-empty">还没有记录<br>今天完成第一项就会自动保存 ✨</div>';
-  } else {
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const wdays  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    entries.forEach(e => {
-      const date    = new Date(e.dateStr + 'T12:00:00');
-      const isToday = e.dateStr === new Date().toISOString().slice(0,10);
-      const done    = e.done  ?? (e.state ? e.state.filter(Boolean).length : 0);
-      const lines   = e.lines ?? 0;
-      const pct     = e.pct   ?? Math.min(done * 20, 100);
-      const visual  = Math.min(pct, 100);
-      const item = document.createElement('div');
-      item.className = 'history-item';
-      item.innerHTML = `
+function openHistory(){
+  const entries=getAllHistory();
+  const list=document.getElementById('historyList');
+  list.innerHTML='';
+  if(!entries.length){ list.innerHTML='<div class="history-empty">还没有记录<br>今天完成第一项就会自动保存 ✨</div>'; }
+  else {
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const wdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    entries.forEach(e=>{
+      const date=new Date(e.dateStr+'T12:00:00');
+      const isToday=e.dateStr===new Date().toISOString().slice(0,10);
+      const done=e.done??(e.state?e.state.filter(Boolean).length:0);
+      const lines=e.lines??0, pct=e.pct??Math.min(done*20,100);
+      const item=document.createElement('div'); item.className='history-item';
+      item.innerHTML=`
         <div class="history-date-block">
-          <div class="history-month">${isToday ? '今天' : months[date.getMonth()]}</div>
+          <div class="history-month">${isToday?'今天':months[date.getMonth()]}</div>
           <div class="history-day">${date.getDate()}</div>
           <div class="history-weekday">${wdays[date.getDay()]}</div>
         </div>
         <div class="history-info">
           <div class="history-pct">${pct}% 完成</div>
-          <div class="history-sub">勾选了 ${done} 项${lines > 0 ? ` · ${lines} 条连线` : ''}</div>
-          <div class="history-bar-bg"><div class="history-bar-fill" style="width:${visual}%"></div></div>
+          <div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div>
+          <div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div>
         </div>
-        <div class="history-bingo ${lines > 0 ? 'show' : ''}">BINGO</div>
-      `;
+        <div class="history-bingo ${lines>0?'show':''}">BINGO</div>`;
       list.appendChild(item);
     });
   }
   document.getElementById('historyOverlay').classList.add('open');
   document.getElementById('historySheet').classList.add('open');
 }
-function closeHistory() {
-  document.getElementById('historyOverlay').classList.remove('open');
-  document.getElementById('historySheet').classList.remove('open');
-}
+function closeHistory(){ document.getElementById('historyOverlay').classList.remove('open'); document.getElementById('historySheet').classList.remove('open'); }
 
 // ── Grid ──────────────────────────────────────────────────────────────────────
-function buildGrid() {
-  const g = document.getElementById('bingoGrid');
-  g.innerHTML = '';
-  order.forEach((taskIdx, pos) => {
-    const pal = PALETTES[pos % PALETTES.length];
-    const c = document.createElement('div');
-    c.className = 'cell' + (state[pos] ? ' active' : '');
+function buildGrid(){
+  const g=document.getElementById('bingoGrid');
+  g.innerHTML='';
+  const blocking = isMandatoryBlocking();
+  order.forEach((taskIdx,pos)=>{
+    const pal=PALETTES[pos%PALETTES.length];
+    const locked = blocking!==null && !mandatory.has(taskIdx);
+    const isMand = mandatory.has(taskIdx);
+    const c=document.createElement('div');
+    let cls='cell';
+    if(state[pos] && !locked) cls+=' active';
+    if(locked) cls+=' locked';
+    if(isMand && !state[pos]) cls+=' mandatory';
+    c.className=cls;
     c.dataset.i  = pos;
     c.dataset.bg = pal.bg;
     c.dataset.fg = pal.color;
-    if (!state[pos]) { c.style.background = pal.bg; c.style.color = pal.color; }
+    if(!state[pos] && !locked) { c.style.background=pal.bg; c.style.color=pal.color; }
 
-    // text node + note indicator dot
-    const textNode = document.createTextNode(getTaskName(taskIdx));
-    const dot = document.createElement('span');
-    dot.className = 'note-dot' + (hasNoteOrTodo(taskIdx) ? ' show' : '');
-    c.appendChild(textNode);
+    const textSpan = document.createElement('span');
+    textSpan.className = 'cell-text';
+    textSpan.textContent = getTaskName(taskIdx);
+    c.appendChild(textSpan);
+
+    if(isMand){ const li=document.createElement('span'); li.className='lock-icon'; li.textContent='⚡'; c.appendChild(li); }
+
+    const dot=document.createElement('span');
+    dot.className='note-dot'+(hasNoteOrTodo(taskIdx)?' show':'');
     c.appendChild(dot);
 
-    c.addEventListener('mousedown',  () => startPress(pos, c));
-    c.addEventListener('mouseup',    () => cancelPress(c));
-    c.addEventListener('mouseleave', () => cancelPress(c));
-    c.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(pos, c); }, { passive: false });
-    c.addEventListener('touchend',   () => { cancelPress(c); if (!didLongPress) toggle(pos); });
-    c.addEventListener('touchmove',  () => cancelPress(c));
-    c.onclick = () => { if (!didLongPress) toggle(pos); };
+    c.addEventListener('mousedown',  ()=>startPress(pos,c));
+    c.addEventListener('mouseup',    ()=>cancelPress(c));
+    c.addEventListener('mouseleave', ()=>cancelPress(c));
+    c.addEventListener('touchstart', (e)=>{ e.preventDefault(); startPress(pos,c); },{passive:false});
+    c.addEventListener('touchend',   ()=>{ cancelPress(c); if(!didLongPress) toggle(pos); });
+    c.addEventListener('touchmove',  ()=>cancelPress(c));
+    c.onclick = ()=>{ if(!didLongPress) toggle(pos); };
     g.appendChild(c);
   });
 }
 
-function toggle(pos) {
-  state[pos] = !state[pos];
+function toggle(pos){
+  const taskIdx = order[pos];
+  // Locked check
+  if(isCellLocked(pos)){
+    const blocking = isMandatoryBlocking();
+    vibrate([30,40,30]);
+    const c=document.querySelector(`.cell[data-i="${pos}"]`);
+    c.classList.add('shake');
+    c.addEventListener('animationend',()=>c.classList.remove('shake'),{once:true});
+    showLockedToast(`请先完成「${blocking}」⚡`);
+    return;
+  }
+  state[pos]=!state[pos];
   save();
-  const c = document.querySelector(`.cell[data-i="${pos}"]`);
-  c.classList.toggle('active', state[pos]);
-  if (!state[pos]) { c.style.background = c.dataset.bg; c.style.color = c.dataset.fg; }
-  else             { c.style.background = ''; c.style.color = ''; }
-  c.classList.remove('pop');
-  void c.offsetWidth;
-  c.classList.add('pop');
-  c.addEventListener('animationend', () => c.classList.remove('pop'), { once: true });
+  const c=document.querySelector(`.cell[data-i="${pos}"]`);
+  c.classList.toggle('active',state[pos]);
+  if(!state[pos]){ c.style.background=c.dataset.bg; c.style.color=c.dataset.fg; }
+  else           { c.style.background=''; c.style.color=''; }
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+  c.addEventListener('animationend',()=>c.classList.remove('pop'),{once:true});
+
+  if(state[pos]){
+    vibrate(50);
+    burstParticles(c);
+  } else {
+    vibrate(20);
+  }
+
   render();
+  // rebuild to update lock states
+  buildGrid();
 }
 
 // ── Logic ─────────────────────────────────────────────────────────────────────
-function getLines() {
-  const lines = [];
-  for (let r = 0; r < SIZE; r++) {
-    const row = Array.from({length:SIZE},(_,c)=>r*SIZE+c);
-    if (row.every(i=>state[i])) lines.push(row);
-  }
-  for (let c = 0; c < SIZE; c++) {
-    const col = Array.from({length:SIZE},(_,r)=>r*SIZE+c);
-    if (col.every(i=>state[i])) lines.push(col);
-  }
-  const d1 = Array.from({length:SIZE},(_,i)=>i*SIZE+i);
-  const d2 = Array.from({length:SIZE},(_,i)=>i*SIZE+(SIZE-1-i));
-  if (d1.every(i=>state[i])) lines.push(d1);
-  if (d2.every(i=>state[i])) lines.push(d2);
+function getLines(){
+  const lines=[];
+  for(let r=0;r<SIZE;r++){ const row=Array.from({length:SIZE},(_,c)=>r*SIZE+c); if(row.every(i=>state[i])) lines.push(row); }
+  for(let c=0;c<SIZE;c++){ const col=Array.from({length:SIZE},(_,r)=>r*SIZE+c); if(col.every(i=>state[i])) lines.push(col); }
+  const d1=Array.from({length:SIZE},(_,i)=>i*SIZE+i), d2=Array.from({length:SIZE},(_,i)=>i*SIZE+(SIZE-1-i));
+  if(d1.every(i=>state[i])) lines.push(d1);
+  if(d2.every(i=>state[i])) lines.push(d2);
   return lines;
 }
-function calcPct(done, lineCount) {
-  if (lineCount > 0) return 100 + Math.max(0, done - 5) * 20;
-  return Math.min(done * 20, 100);
+function calcPct(done,lineCount){ if(lineCount>0) return 100+Math.max(0,done-5)*20; return Math.min(done*20,100); }
+
+const SUBS=["完成一项 +20%，连成一线即 100%","好的开始，继续加油 💪","状态不错，保持节奏","已完成超过一半了！","快到终点了，冲！","还差一步就连线了","Bingo！继续超越 🎉"];
+
+function render(){
+  const done=state.filter(Boolean).length, lines=getLines(), n=lines.length;
+  const pct=calcPct(done,n), visual=Math.min(pct,100);
+  document.getElementById('ringFill').style.strokeDashoffset=CIRC*(1-visual/100);
+  document.getElementById('ringLabel').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=visual+'%';
+  document.getElementById('progressSub').textContent=SUBS[n>0?6:Math.min(Math.floor(done/5),5)];
+  const hint=document.getElementById('progressHint');
+  if(n>0&&done>5){ hint.textContent=`已额外完成 ${done-5} 项 · 总计 ${done} 项`; hint.style.color='var(--green-dk)'; }
+  else if(n===0&&done>0){ hint.textContent=`已完成 ${done} 项`; hint.style.color='var(--blue-dk)'; }
+  else hint.textContent='';
+  const allIdx=new Set(lines.flat());
+  document.querySelectorAll('.cell').forEach(c=>{ c.classList.remove('bingo-line'); if(!state[+c.dataset.i]&&!c.classList.contains('locked')){ c.style.background=c.dataset.bg; c.style.color=c.dataset.fg; } });
+  allIdx.forEach(i=>{ const c=document.querySelector(`.cell[data-i="${i}"]`); if(c){ c.classList.add('bingo-line'); c.style.background=''; c.style.color=''; } });
+  document.getElementById('badgeText').textContent=`连成 ${n} 条线！`;
+  document.getElementById('bingoBadge').classList.toggle('show',n>0);
+  if(n>prevLines){ doConfetti(); showToast('🎉 BINGO！'); vibrate([50,30,80]); }
+  prevLines=n;
 }
 
-const SUBS = [
-  "完成一项 +20%，连成一线即 100%",
-  "好的开始，继续加油 💪",
-  "状态不错，保持节奏",
-  "已完成超过一半了！",
-  "快到终点了，冲！",
-  "还差一步就连线了",
-  "Bingo！继续超越 🎉"
-];
-
-function render() {
-  const done   = state.filter(Boolean).length;
-  const lines  = getLines();
-  const n      = lines.length;
-  const pct    = calcPct(done, n);
-  const visual = Math.min(pct, 100);
-
-  document.getElementById('ringFill').style.strokeDashoffset = CIRC * (1 - visual / 100);
-  document.getElementById('ringLabel').textContent = pct + '%';
-  document.getElementById('progressFill').style.width = visual + '%';
-
-  const subIdx = n > 0 ? 6 : Math.min(Math.floor(done/5), 5);
-  document.getElementById('progressSub').textContent = SUBS[subIdx];
-
-  const hint = document.getElementById('progressHint');
-  if (n > 0 && done > 5) {
-    hint.textContent = `已额外完成 ${done-5} 项 · 总计 ${done} 项`;
-    hint.style.color = 'var(--green-dk)';
-  } else if (n === 0 && done > 0) {
-    hint.textContent = `已完成 ${done} 项`;
-    hint.style.color = 'var(--blue-dk)';
-  } else {
-    hint.textContent = '';
-  }
-
-  const allIdx = new Set(lines.flat());
-  document.querySelectorAll('.cell').forEach(c => {
-    c.classList.remove('bingo-line');
-    if (!state[+c.dataset.i]) { c.style.background = c.dataset.bg; c.style.color = c.dataset.fg; }
-  });
-  allIdx.forEach(i => {
-    const c = document.querySelector(`.cell[data-i="${i}"]`);
-    if (c) { c.classList.add('bingo-line'); c.style.background=''; c.style.color=''; }
-  });
-
-  document.getElementById('badgeText').textContent = `连成 ${n} 条线！`;
-  document.getElementById('bingoBadge').classList.toggle('show', n > 0);
-
-  if (n > prevLines) { doConfetti(); showToast('🎉 BINGO！'); }
-  prevLines = n;
+function shuffle(){
+  for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+  state=Array(25).fill(false); prevLines=0;
+  save(); buildGrid(); render(); showToast('已随机排列 🔀');
 }
+function resetAll(){ state=Array(25).fill(false); prevLines=0; save(); buildGrid(); render(); showToast('已重置'); }
 
-function shuffle() {
-  for (let i = order.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [order[i],order[j]] = [order[j],order[i]];
-  }
-  state = Array(25).fill(false);
-  prevLines = 0;
-  save(); buildGrid(); render();
-  showToast('已随机排列 🔀');
-}
+// ── Toasts ────────────────────────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
 
-function resetAll() {
-  state = Array(25).fill(false);
-  prevLines = 0;
-  save(); buildGrid(); render();
-  showToast('已重置');
-}
+let lockedTimer=null;
+function showLockedToast(msg){ const t=document.getElementById('lockedToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(lockedTimer); lockedTimer=setTimeout(()=>t.classList.remove('show'),2000); }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-function doConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const colors = ['#7eb8f7','#7dcfaa','#f7c97e','#f48fb1','#b39ddb','#f4967e'];
-  const ps = Array.from({length:65}, () => ({
-    x: Math.random()*canvas.width, y: -15-Math.random()*80,
-    w: 6+Math.random()*6, h: 3+Math.random()*4,
-    color: colors[Math.floor(Math.random()*colors.length)],
-    vx: (Math.random()-.5)*4, vy: 2.5+Math.random()*3.5,
-    rot: Math.random()*360, vrot: (Math.random()-.5)*8, alpha: 1,
-  }));
-  let f = 0;
-  (function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    let alive = false;
-    ps.forEach(p => {
-      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot; p.vy+=0.08;
-      if (f>55) p.alpha = Math.max(0, p.alpha-0.014);
-      if (p.y<canvas.height+20 && p.alpha>0) alive=true;
-      ctx.save(); ctx.globalAlpha=p.alpha;
-      ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
-      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-      ctx.restore();
-    });
-    f++;
-    if (alive && f<200) requestAnimationFrame(draw);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
+// ── Confetti ──────────────────────────────────────────────────────────────────
+function doConfetti(){
+  const canvas=document.getElementById('confetti-canvas'), ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const colors=['#7eb8f7','#7dcfaa','#f7c97e','#f48fb1','#b39ddb','#f4967e'];
+  const ps=Array.from({length:70},()=>({x:Math.random()*canvas.width,y:-15-Math.random()*80,w:6+Math.random()*6,h:3+Math.random()*4,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-.5)*4,vy:2.5+Math.random()*3.5,rot:Math.random()*360,vrot:(Math.random()-.5)*8,alpha:1}));
+  let f=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height); let alive=false;
+    ps.forEach(p=>{ p.x+=p.vx;p.y+=p.vy;p.rot+=p.vrot;p.vy+=0.08; if(f>55)p.alpha=Math.max(0,p.alpha-0.014); if(p.y<canvas.height+20&&p.alpha>0)alive=true; ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore(); });
+    f++; if(alive&&f<200) requestAnimationFrame(draw); else ctx.clearRect(0,0,canvas.width,canvas.height);
   })();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-const now = new Date();
-const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-document.getElementById('dateDisplay').textContent =
-  `${now.getFullYear()} · ${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} · ${days[now.getDay()]}`;
-
-load(); loadCustomTasks(); loadDetails(); buildGrid(); render();
+const now=new Date(), wdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+document.getElementById('dateDisplay').textContent=`${now.getFullYear()} · ${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} · ${wdays[now.getDay()]}`;
+load(); loadCustomTasks(); loadDetails(); loadMandatory(); loadAppName(); buildGrid(); render();
 </script>
 </body>
 </html>
