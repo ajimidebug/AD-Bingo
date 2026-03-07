@@ -2,7 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>ADHD Bingo</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QSJH4PNR3R"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-QSJH4PNR3R');</script>
@@ -30,7 +32,7 @@ body.theme-mono{
 }
 body.theme-mono .progress-bar-fill{background:linear-gradient(90deg,#888,#444,#222)!important;}
 body.theme-mono .cell:not(.active):not(.bingo-line):not(.locked):not(.empty){background:#e4e4e4!important;color:#555!important;}
-body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 70px;color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:max(24px,env(safe-area-inset-top)) 16px max(70px,calc(70px + env(safe-area-inset-bottom))) max(16px,env(safe-area-inset-left));color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
 /* Header */
 .header{width:100%;max-width:420px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;opacity:0;animation:up .45s ease forwards;}
@@ -60,22 +62,27 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .progress-bar-fill{height:100%;background:linear-gradient(90deg,#c3b1e1,var(--done),var(--green));border-radius:99px;transition:width .65s cubic-bezier(.4,0,.2,1);width:0%;}
 .progress-hint{font-size:.7rem;font-weight:700;color:var(--text-mid);margin-top:8px;min-height:1.3em;}
 
-/* Cheer */
-.cheer-banner{width:100%;max-width:420px;min-height:32px;display:flex;align-items:center;margin-bottom:6px;opacity:0;transition:opacity .4s;}
+/* Cheer + Badge on same row */
+.cheer-badge-row{width:100%;max-width:420px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;margin-bottom:8px;opacity:0;animation:up .45s .12s ease forwards;}
+.cheer-banner{flex:1;min-width:0;opacity:0;transition:opacity .4s;}
 .cheer-banner.show{opacity:1;}
-.cheer-text{font-size:.82rem;font-weight:800;color:var(--done-dk);background:var(--done-lt);border-radius:99px;padding:5px 16px;line-height:1.4;}
-
+.cheer-text{font-size:.82rem;font-weight:800;color:var(--done-dk);background:var(--done-lt);border-radius:99px;padding:5px 16px;line-height:1.4;display:inline-block;}
 /* Badge */
-.badge-row{width:100%;max-width:420px;min-height:34px;display:flex;align-items:center;gap:8px;margin-bottom:8px;opacity:0;animation:up .45s .12s ease forwards;}
-.badge{display:none;align-items:center;gap:5px;background:var(--amber-lt);border:1.5px solid #f7d99a;border-radius:99px;padding:5px 13px;font-size:.73rem;font-weight:800;color:var(--amber-dk);}
+.badge{display:none;align-items:center;gap:5px;background:var(--amber-lt);border:1.5px solid #f7d99a;border-radius:99px;padding:5px 13px;font-size:.73rem;font-weight:800;color:var(--amber-dk);flex-shrink:0;}
 .badge.show{display:flex;}
 
-/* Size */
-.size-row{width:100%;max-width:420px;display:flex;align-items:center;gap:8px;margin-bottom:10px;opacity:0;animation:up .45s .14s ease forwards;}
-.size-label{font-size:.72rem;font-weight:800;color:var(--text-lt);}
+/* Size - now inside task panel */
+.size-row{width:100%;max-width:420px;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.size-label{font-size:.78rem;font-weight:800;color:var(--text-mid);}
 .size-btns{display:flex;gap:5px;}
 .size-btn{padding:5px 10px;border-radius:8px;border:2px solid transparent;background:var(--surface);font-size:.75rem;font-weight:800;color:var(--text-mid);cursor:pointer;transition:all .18s;box-shadow:var(--shadow);}
 .size-btn.active{background:var(--done);color:#fff;border-color:var(--done-dk);}
+/* Task panel size section */
+.tp-size-section{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:12px;padding:10px 14px;margin-bottom:10px;}
+.tp-size-label{font-size:.82rem;font-weight:800;color:var(--text);}
+.tp-size-btns{display:flex;gap:5px;}
+.tp-size-btn{padding:5px 11px;border-radius:8px;border:2px solid transparent;background:var(--surface);font-size:.78rem;font-weight:800;color:var(--text-mid);cursor:pointer;transition:all .18s;box-shadow:var(--shadow);}
+.tp-size-btn.active{background:var(--done);color:#fff;border-color:var(--done-dk);}
 
 /* Grid */
 .grid-card{width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:12px;box-shadow:var(--shadow);opacity:0;animation:up .45s .17s ease forwards;}
@@ -123,23 +130,30 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .task-count-hint{font-size:.7rem;color:var(--text-lt);font-weight:600;text-align:center;padding:4px 0 8px;}
 
 /* Group */
-.group-header{display:flex;align-items:center;gap:8px;margin:14px 0 7px;padding:0 2px;}
-.group-name-input{flex:1;font-size:.8rem;font-weight:800;color:var(--text-mid);background:transparent;border:none;outline:none;font-family:"Nunito","Noto Sans SC",sans-serif;-webkit-appearance:none;}
+.group-header{display:flex;align-items:center;gap:8px;margin:14px 0 7px;padding:6px 10px;border-radius:10px;border-left:4px solid transparent;}
+.group-name-input{flex:1;font-size:.95rem;font-weight:900;color:var(--text);background:transparent;border:none;outline:none;font-family:"Nunito","Noto Sans SC",sans-serif;-webkit-appearance:none;}
 .group-name-input:focus{background:var(--purple-lt);border-radius:6px;padding:1px 4px;}
-.group-del-btn{width:22px;height:22px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--text-lt);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+.group-controls{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.group-sel-all{padding:3px 8px;border-radius:6px;border:none;font-size:.68rem;font-weight:800;cursor:pointer;background:var(--done-lt);color:var(--done-dk);transition:all .18s;}
+.group-sel-all:hover{background:var(--done);color:#fff;}
+.group-del-btn{width:24px;height:24px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--text-lt);font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
 .group-del-btn:hover{background:var(--coral-lt);color:var(--coral);}
 .add-group-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg);border-radius:10px;border:none;cursor:pointer;font-size:.78rem;font-weight:700;color:var(--text-mid);width:100%;margin-top:10px;}
 .add-group-btn:hover{background:var(--purple-lt);color:#7b5ea7;}
 
 /* Task bubbles */
 .task-bubble-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
-.task-bubble{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:.82rem;font-weight:700;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text-mid);border:2px solid transparent;cursor:pointer;user-select:none;transition:all .18s;position:relative;}
+.task-bubble{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:.82rem;font-weight:700;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text-mid);border:2px solid transparent;cursor:grab;user-select:none;transition:all .18s;position:relative;}
 .task-bubble:hover{background:var(--done-lt);}
 .task-bubble.active-bubble{background:var(--done);color:#fff;border-color:var(--done-dk);}
-.task-bubble.dragging-bubble{opacity:.45;transform:scale(.92);}
+.task-bubble.dragging-bubble{opacity:.45;transform:scale(.92);cursor:grabbing;}
 .task-bubble.drag-over-bubble{border-color:var(--purple);background:var(--purple-lt);}
-.bubble-del{width:16px;height:16px;border-radius:50%;border:none;background:rgba(0,0,0,.12);cursor:pointer;color:inherit;font-size:.6rem;display:flex;align-items:center;justify-content:center;opacity:.7;padding:0;line-height:1;flex-shrink:0;}
-.bubble-del:hover{opacity:1;background:rgba(0,0,0,.22);}
+.bubble-del{width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.15);cursor:pointer;color:inherit;font-size:.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.bubble-del:hover,.bubble-del:active{background:rgba(0,0,0,.32);}
+/* Trash drop zone */
+.task-trash-zone{display:none;align-items:center;justify-content:center;gap:8px;margin:12px 0 4px;padding:12px;border-radius:14px;border:2px dashed var(--text-lt);color:var(--text-lt);font-size:.82rem;font-weight:800;transition:all .25s;background:transparent;cursor:default;}
+.task-trash-zone.visible{display:flex;}
+.task-trash-zone.drag-active{border-color:var(--coral);background:var(--coral-lt);color:#c05040;transform:scale(1.02);}
 .task-add-row{display:flex;gap:6px;margin-top:8px;}
 .task-add-input{flex:1;padding:8px 11px;background:var(--bg);border:2px solid transparent;border-radius:10px;outline:none;font-family:"Noto Sans SC",sans-serif;font-size:.85rem;color:var(--text);transition:border-color .2s;-webkit-appearance:none;}
 .task-add-input:focus{border-color:var(--done);}
@@ -254,6 +268,113 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 #confetti-canvas,#particle-canvas{position:fixed;inset:0;pointer-events:none;z-index:60;}
 #particle-canvas{z-index:61;}
+/* Data export/import modal */
+.export-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.export-modal-overlay.show{opacity:1;pointer-events:all;}
+.export-modal{background:var(--surface);border-radius:24px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.export-modal h3{font-size:1rem;font-weight:900;color:var(--text);margin-bottom:6px;}
+.export-modal p{font-size:.78rem;color:var(--text-mid);font-weight:600;margin-bottom:14px;line-height:1.6;}
+.export-textarea{width:100%;height:100px;padding:10px 12px;background:var(--bg);border:2px solid transparent;border-radius:12px;font-size:.72rem;font-family:monospace;color:var(--text);resize:none;outline:none;margin-bottom:10px;-webkit-appearance:none;}
+.export-textarea:focus{border-color:var(--purple);}
+.export-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.export-btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:.82rem;font-weight:800;cursor:pointer;transition:all .18s;min-width:80px;}
+.export-btn-copy{background:var(--done);color:#fff;}
+.export-btn-import{background:var(--green);color:#fff;}
+.export-btn-close{background:var(--bg);color:var(--text-mid);}
+.pwa-banner{position:fixed;bottom:80px;left:16px;right:16px;background:var(--purple);color:#fff;padding:14px 18px;border-radius:16px;font-size:.8rem;font-weight:800;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:600;cursor:pointer;display:none;text-align:center;line-height:1.6;}
+/* BINGO celebration modal */
+.bingo-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .35s;}
+.bingo-modal-overlay.show{opacity:1;pointer-events:all;}
+.bingo-modal{background:var(--surface);border-radius:28px;padding:36px 28px 28px;width:100%;max-width:340px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.22);transform:scale(.82) translateY(20px);transition:transform .4s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
+.bingo-modal-overlay.show .bingo-modal{transform:scale(1) translateY(0);}
+.bingo-modal::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(137,207,240,.12),rgba(125,207,170,.12),rgba(247,201,126,.12));pointer-events:none;}
+.bingo-modal-emoji{font-size:3.6rem;line-height:1;margin-bottom:10px;display:block;animation:bingo-bounce .6s cubic-bezier(.34,1.56,.64,1) .2s both;}
+.bingo-modal-title{font-size:2rem;font-weight:900;color:var(--text);margin-bottom:6px;letter-spacing:-.01em;}
+.bingo-modal-lines{display:inline-flex;align-items:center;gap:6px;background:var(--amber-lt);border:1.5px solid #f7d99a;border-radius:99px;padding:6px 16px;font-size:.85rem;font-weight:800;color:var(--amber-dk);margin-bottom:14px;}
+.bingo-modal-cheer{font-size:1.05rem;font-weight:800;color:var(--text-mid);margin-bottom:24px;line-height:1.5;}
+.bingo-modal-btn{width:100%;padding:15px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--done),var(--green));color:#fff;font-family:"Nunito","Noto Sans SC",sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(137,207,240,.4);transition:transform .18s;}
+.bingo-modal-btn:active{transform:scale(.97);}
+@keyframes bingo-bounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0deg)}}
+
+/* ── Achievement card (floating unlock notification) ── */
+.ach-card{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);z-index:500;pointer-events:auto;transition:opacity .3s,transform .3s cubic-bezier(.34,1.56,.64,1);width:min(300px,calc(100vw - 32px));display:none;opacity:0;cursor:pointer;}
+.ach-card.show{display:block;opacity:1;transform:translateX(-50%) translateY(0);}
+.ach-card-inner{background:linear-gradient(135deg,#fff9e6,#fff3cd);border:2px solid #f7c97e;border-radius:22px;padding:16px 20px;box-shadow:0 12px 40px rgba(0,0,0,.15);display:flex;align-items:center;gap:14px;}
+.ach-card-emoji{font-size:2.4rem;line-height:1;flex-shrink:0;animation:bingo-bounce .5s cubic-bezier(.34,1.56,.64,1) both;}
+.ach-card-label{font-size:.65rem;font-weight:900;color:var(--amber-dk);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase;}
+.ach-card-title{font-size:.95rem;font-weight:900;color:var(--text);line-height:1.3;}
+.ach-card-desc{font-size:.75rem;font-weight:600;color:var(--text-mid);margin-top:2px;}
+
+/* ── Achievement gallery ── */
+.ach-gallery-body{overflow-y:auto;padding:12px 16px 32px;flex:1;}
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.ach-item{border-radius:18px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .18s;position:relative;border:2px solid transparent;}
+.ach-item:active{transform:scale(.95);}
+.ach-item.locked{background:var(--bg);border-color:transparent;opacity:.55;}
+.ach-item.unlocked{background:linear-gradient(135deg,#fff9e6,#fef3e0);border-color:#f7c97e;box-shadow:0 4px 16px rgba(247,201,126,.25);}
+.ach-item-emoji{font-size:2rem;line-height:1;filter:grayscale(1);transition:filter .3s;}
+.ach-item.unlocked .ach-item-emoji{filter:none;}
+.ach-item-title{font-size:.7rem;font-weight:800;color:var(--text-mid);text-align:center;line-height:1.3;}
+.ach-item.unlocked .ach-item-title{color:var(--text);}
+.ach-item-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:.55rem;color:#fff;font-weight:900;}
+.ach-item.unlocked .ach-item-check{display:flex;}
+.ach-item-cond{font-size:.58rem;font-weight:700;color:var(--text-lt);text-align:center;line-height:1.3;margin-top:1px;}
+/* edit modal */
+.ach-edit-overlay{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(safe-area-inset-bottom);}
+.ach-edit-box{background:var(--surface);border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;}
+.ach-edit-emoji-big{font-size:3rem;text-align:center;margin-bottom:4px;}
+.ach-edit-emoji-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.ach-edit-emoji-input{width:64px;height:64px;font-size:2.2rem;text-align:center;border-radius:16px;border:2px solid var(--amber);background:var(--amber-lt);outline:none;cursor:pointer;flex-shrink:0;line-height:1;padding:0;}
+.ach-edit-hint{font-size:.72rem;color:var(--text-lt);font-weight:700;text-align:center;margin-bottom:16px;}
+.ach-edit-field{margin-bottom:12px;}
+.ach-edit-label{font-size:.72rem;font-weight:800;color:var(--text-mid);margin-bottom:5px;display:block;}
+.ach-edit-input{width:100%;padding:10px 12px;background:var(--bg);border:2px solid transparent;border-radius:12px;outline:none;font-family:"Noto Sans SC",sans-serif;font-size:.88rem;color:var(--text);-webkit-appearance:none;transition:border-color .2s;}
+.ach-edit-input:focus{border-color:var(--amber);}
+.ach-edit-btns{display:flex;gap:10px;margin-top:16px;}
+.ach-edit-save{flex:1;padding:13px;border-radius:14px;border:none;background:var(--amber);color:#fff;font-family:"Nunito","Noto Sans SC",sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;}
+.ach-edit-cancel{padding:13px 18px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:"Nunito","Noto Sans SC",sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;}
+.ach-edit-reset{padding:13px 14px;border-radius:14px;border:none;background:var(--coral-lt);color:var(--coral);font-family:"Nunito","Noto Sans SC",sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;}
+/* Task Journal (cross-date notes) */
+#taskJournalSheet{z-index:204;}#taskJournalOverlay{z-index:203;}
+.journal-body{overflow-y:auto;padding:0 16px 32px;flex:1;}
+.journal-empty{text-align:center;padding:40px 20px;font-size:.85rem;color:var(--text-lt);font-weight:600;}
+.journal-entry{background:var(--bg);border-radius:16px;padding:14px 16px;margin-bottom:10px;position:relative;}
+.journal-entry-date{font-size:.72rem;font-weight:900;color:var(--done-dk);margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.journal-entry-date-badge{background:var(--done-lt);border-radius:99px;padding:3px 10px;}
+.journal-entry-done{font-size:.68rem;font-weight:700;color:var(--green-dk);background:var(--green-lt);border-radius:99px;padding:2px 8px;}
+.journal-entry-notes{font-size:.85rem;color:var(--text);font-weight:600;line-height:1.6;margin-bottom:6px;white-space:pre-wrap;}
+.journal-todo-item{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:600;padding:2px 0;}
+.journal-todo-item.journal-todo-done{color:var(--text-lt);text-decoration:line-through;}
+.journal-todo-check{width:14px;height:14px;border-radius:50%;border:2px solid var(--text-lt);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:transparent;}
+.journal-todo-check.done-check{background:var(--green);border-color:var(--green-dk);color:#fff;}
+.journal-jump-btn{font-size:.72rem;font-weight:800;color:var(--done-dk);cursor:pointer;margin-top:10px;display:inline-block;padding:5px 12px;background:var(--done-lt);border-radius:99px;border:none;transition:all .18s;}
+.journal-jump-btn:hover{background:var(--done);color:#fff;}
+/* Touch action - pan-y lets panel scroll, JS overrides when dragging */
+.task-bubble{touch-action:pan-y;}
+.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-modal{background:var(--surface);border-radius:24px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.login-title{font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:4px;text-align:center;}
+.login-sub{font-size:.78rem;color:var(--text-lt);font-weight:600;text-align:center;margin-bottom:24px;}
+.login-field{margin-bottom:14px;}
+.login-label{font-size:.72rem;font-weight:800;color:var(--text-mid);margin-bottom:6px;display:block;}
+.login-input{width:100%;padding:12px 14px;background:var(--bg);border:2px solid transparent;border-radius:12px;outline:none;font-family:"Noto Sans SC",sans-serif;font-size:.9rem;color:var(--text);transition:border-color .2s;-webkit-appearance:none;}
+.login-input:focus{border-color:var(--purple);}
+.login-input::placeholder{color:var(--text-lt);}
+.login-btn{width:100%;padding:13px;border-radius:14px;border:none;background:var(--purple);color:#fff;font-family:"Nunito","Noto Sans SC",sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;margin-top:8px;transition:all .18s;}
+.login-btn:active{transform:scale(.97);}
+.login-skip{display:block;text-align:center;margin-top:14px;font-size:.75rem;color:var(--text-lt);font-weight:700;cursor:pointer;padding:4px;}
+.login-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg);padding:4px;border-radius:12px;}
+.login-tab{flex:1;padding:7px;border-radius:9px;border:none;background:transparent;font-size:.8rem;font-weight:800;color:var(--text-mid);cursor:pointer;transition:all .18s;}
+.login-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+.login-user-badge{display:flex;align-items:center;gap:8px;background:var(--purple-lt);border-radius:99px;padding:5px 12px 5px 5px;cursor:pointer;transition:all .18s;}
+.login-user-badge:hover{background:var(--purple);color:#fff;}
+.login-avatar{width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0;}
+.login-username{font-size:.72rem;font-weight:800;color:var(--purple);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* History long-press hint */
+.history-item{cursor:default;-webkit-touch-callout:none;user-select:none;}
+.history-item.long-press-active{background:var(--done-lt)!important;transform:scale(.98);}
+.history-date-block{cursor:pointer;}
+.history-longpress-hint{font-size:.62rem;color:var(--text-lt);font-weight:600;text-align:center;padding:4px 0 0;opacity:.7;}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.28)}65%{transform:scale(.92)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
@@ -267,17 +388,86 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 <div class="toast" id="toast"></div>
 <div class="locked-toast" id="lockedToast"></div>
 
+<!-- BINGO Celebration Modal -->
+<div class="bingo-modal-overlay" id="bingoModalOverlay" onclick="closeBingoModal()">
+  <div class="bingo-modal" onclick="event.stopPropagation()">
+    <span class="bingo-modal-emoji" id="bingoModalEmoji">🎯</span>
+    <div class="bingo-modal-title">BINGO！！！</div>
+    <div class="bingo-modal-lines" id="bingoModalLines">连成 1 条线！</div>
+    <div class="bingo-modal-cheer" id="bingoModalCheer"></div>
+    <button class="bingo-modal-btn" onclick="closeBingoModal()">太棒了，继续！ 🚀</button>
+  </div>
+</div>
+
+<!-- Data Export/Import Modal -->
+<div class="export-modal-overlay" id="exportModalOverlay">
+  <div class="export-modal">
+    <h3 id="exportModalTitle">📦 数据导出</h3>
+    <p id="exportModalDesc">复制以下代码，在目标设备/浏览器中选择「导入数据」并粘贴，即可迁移所有记录。</p>
+    <textarea class="export-textarea" id="exportTextarea" placeholder="在此粘贴导入码…"></textarea>
+    <div class="export-btns">
+      <button class="export-btn export-btn-copy" id="exportCopyBtn" onclick="exportCopy()">复制导出码</button>
+      <button class="export-btn export-btn-import" onclick="importData()">导入数据</button>
+      <button class="export-btn export-btn-close" onclick="closeExportModal()">关闭</button>
+    </div>
+  </div>
+</div>
+<!-- PWA migration banner -->
+<div class="pwa-banner" id="pwaBanner" onclick="openExportModal(true)">
+  📱 检测到从主屏幕启动<br>点击这里从浏览器导入历史数据 →
+</div>
+
+<!-- Login Modal -->
+<div class="login-overlay" id="loginOverlay" style="display:none;">
+  <div class="login-modal">
+    <div class="login-title">👾 ADHD Bingo</div>
+    <div class="login-sub">登录后数据可同步，跳过则仅存本地</div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">登录</button>
+      <button class="login-tab" id="tabReg" onclick="switchLoginTab('reg')">注册</button>
+    </div>
+    <div class="login-field">
+      <label class="login-label">用户名</label>
+      <input class="login-input" id="loginUser" type="text" placeholder="输入用户名" maxlength="20" autocomplete="username" autocorrect="off" autocapitalize="none"/>
+    </div>
+    <div class="login-field">
+      <label class="login-label">密码</label>
+      <input class="login-input" id="loginPass" type="password" placeholder="输入密码" maxlength="30" autocomplete="current-password"/>
+    </div>
+    <div class="login-field" id="loginPassConfirmField" style="display:none;">
+      <label class="login-label">确认密码</label>
+      <input class="login-input" id="loginPassConfirm" type="password" placeholder="再次输入密码" maxlength="30" autocomplete="new-password"/>
+    </div>
+    <button class="login-btn" id="loginSubmitBtn" onclick="doLogin()">登录</button>
+    <span class="login-skip" onclick="skipLogin()">暂时跳过，仅使用本地存储</span>
+  </div>
+</div>
+
 <!-- Task Panel -->
 <div class="task-panel-overlay" id="taskOverlay" onclick="closeTaskPanel()"></div>
 <div class="task-panel" id="taskPanel">
   <div class="task-panel-header">
-    <div><div class="task-panel-title">📋 任务列表</div><div class="task-panel-sub">勾选放入 Bingo · 拖动 ⠿ 排序 · 长按分组标题改名</div></div>
+    <div><div class="task-panel-title">📋 任务列表</div><div class="task-panel-sub">点击选择 · 拖动排序 · 点 ✕ 删除</div></div>
     <button class="task-panel-close" onclick="closeTaskPanel()">✕</button>
   </div>
   <div class="task-panel-actions">
     <button class="tp-all" onclick="selectAllTasks(true)">全选</button>
     <button class="tp-none" onclick="selectAllTasks(false)">全取消</button>
     <button class="tp-apply" onclick="applyTaskSelection()">应用 ✓</button>
+  </div>
+  <!-- Size setting inside task panel -->
+  <div style="padding:6px 16px 0;">
+    <div class="tp-size-section">
+      <span class="tp-size-label">🎯 格子大小</span>
+      <div class="tp-size-btns">
+        <button class="tp-size-btn" onclick="setSize(3)" id="tpsz3">3×3</button>
+        <button class="tp-size-btn" onclick="setSize(4)" id="tpsz4">4×4</button>
+        <button class="tp-size-btn active" onclick="setSize(5)" id="tpsz5">5×5</button>
+        <button class="tp-size-btn" onclick="setSize(6)" id="tpsz6">6×6</button>
+      </div>
+    </div>
+    <!-- Trash drop zone (desktop only, hidden on mobile) -->
+    <div class="task-trash-zone" id="trashZone" style="display:none;">🗑️ 拖到这里删除（桌面）</div>
   </div>
   <div class="task-panel-body" id="taskPanelBody"></div>
 </div>
@@ -301,6 +491,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
       <div class="cal-month-label" id="calMonthLabel"></div>
       <button class="cal-nav-btn" onclick="calNext()">›</button>
     </div>
+    <div style="text-align:center;font-size:.68rem;font-weight:700;color:var(--text-lt);margin-bottom:10px;">单击预览 · 双击跳转编辑</div>
     <div class="cal-grid" id="calGrid"></div>
     <div id="calDetail"></div>
   </div>
@@ -333,6 +524,17 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
   </div>
 </div>
 
+<!-- Task Journal Sheet -->
+<div class="overlay" id="taskJournalOverlay" onclick="closeTaskJournal()"></div>
+<div class="sheet" id="taskJournalSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="taskJournalTitle">📓 任务日志</div>
+    <button class="sheet-close" onclick="closeTaskJournal()">✕</button>
+  </div>
+  <div class="journal-body" id="taskJournalBody"></div>
+</div>
+
 <!-- Header -->
 <div class="header">
   <div class="header-left">
@@ -341,6 +543,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
     <div class="viewing-banner" id="viewingBanner"></div>
   </div>
   <div class="header-right">
+    <div id="userBadgeBtn" onclick="openLoginModal()" style="display:none;"></div>
     <button class="btn-icon" id="returnTodayBtn" onclick="returnToToday()" title="返回今天" style="display:none;background:var(--coral-lt);color:var(--coral);">↩</button>
     <button class="btn-icon" onclick="openCal()" title="日历">📅</button>
     <button class="btn-icon" onclick="openHistory()" title="历史">🕐</button>
@@ -364,17 +567,9 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
   <div class="progress-hint" id="progressHint"></div>
 </div>
 
-<div class="cheer-banner" id="cheerBanner"><div class="cheer-text"><span id="cheerText"></span></div></div>
-<div class="badge-row"><div class="badge" id="bingoBadge">🎯 <span id="badgeText"></span></div></div>
-
-<div class="size-row">
-  <span class="size-label">格子大小：</span>
-  <div class="size-btns">
-    <button class="size-btn" onclick="setSize(3)" id="sz3">3×3</button>
-    <button class="size-btn" onclick="setSize(4)" id="sz4">4×4</button>
-    <button class="size-btn active" onclick="setSize(5)" id="sz5">5×5</button>
-    <button class="size-btn" onclick="setSize(6)" id="sz6">6×6</button>
-  </div>
+<div class="cheer-badge-row">
+  <div class="cheer-banner" id="cheerBanner"><div class="cheer-text"><span id="cheerText"></span></div></div>
+  <div class="badge" id="bingoBadge">🎯 <span id="badgeText"></span></div>
 </div>
 
 <div class="grid-card"><div class="grid" id="bingoGrid"></div></div>
@@ -383,6 +578,32 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
   <button class="btn btn-task" onclick="openTaskPanel()">📋 任务</button>
   <button class="btn btn-shuffle" onclick="doShuffle()">🔀 随机</button>
   <button class="btn btn-reset" onclick="doReset()">↺ 重置</button>
+  <button class="btn" style="background:var(--amber-lt);color:var(--amber-dk);flex:0 0 auto;padding:13px 10px;" onclick="openAchGallery()" title="成就">🏅</button>
+  <button class="btn" style="background:var(--purple-lt);color:#7b5ea7;flex:0 0 auto;padding:13px 10px;" onclick="openExportModal(false)" title="数据迁移">📦</button>
+</div>
+
+<!-- Achievement unlock card (floating) -->
+<div class="ach-card" id="achCard" onclick="_dismissAchCard()" style="display:none;">
+  <div class="ach-card-inner">
+    <div class="ach-card-label">🏅 成就解锁！</div>
+    <div class="ach-card-emoji" id="achCardEmoji">🎯</div>
+    <div class="ach-card-title" id="achCardTitle"></div>
+    <div class="ach-card-desc" id="achCardDesc"></div>
+  </div>
+</div>
+
+<!-- Achievement Gallery Sheet -->
+<div class="overlay" id="achOverlay" onclick="closeAchGallery()"></div>
+<div class="sheet" id="achSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div>
+      <div class="sheet-title">🏅 成就收藏</div>
+      <div style="font-size:.72rem;color:var(--text-lt);font-weight:700;margin-top:2px;" id="achProgress"></div>
+    </div>
+    <button class="sheet-close" onclick="closeAchGallery()">✕</button>
+  </div>
+  <div class="ach-gallery-body" id="achGalleryBody"></div>
 </div>
 
 <script>
@@ -401,14 +622,18 @@ const CHEERS=["搞定！","漂亮！","+1","拿下！","消灭它！","专注达
 const BINGO_CHEERS=["简直是执行力之神！⚡","多巴胺大爆发！！🔥","你是怎么做到的？！天才！","统治全场！👑","Bingo 大满贯！🎯","你的大脑今天开了挂！","史诗级的胜利！🏆","这种连线速度是真实的吗？！","这波操作我给满分！💯","你的意志力正在熊熊燃烧！🔥","连线成功！解锁「高效狂魔」称号！","爽！翻！了！🎉","彻底征服这道防线！💥"];
 const CIRC=157.08;
 const KP='adhd_bingo_';
+const APP_VERSION='3.0.0'; // bump this on each release to trigger migration
 const K={
-  groups: KP+'groups',   // [{name,tasks:[{name,active}]}]
+  groups: KP+'groups',
   detail: KP+'details',
   mand:   KP+'mandatory',
   name:   KP+'appname',
   theme:  KP+'theme',
   ts:     KP+'timestamps',
   size:   KP+'gridsize',
+  user:   KP+'user',
+  ver:    KP+'version',
+  ach:    KP+'achievements',
 };
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -422,9 +647,45 @@ let mandatory=new Set();
 let detailPos=-1;
 let appName='ADHD Bingo';
 let timestamps={};
+let currentUser=null; // {username, passwordHash}
 
 // viewingDate: null = today, else 'YYYY-MM-DD'
 let viewingDate=null;
+
+// ── Achievements ──────────────────────────────────────────────────────────────
+// unlocked: Set of achievement ids
+let achUnlocked=new Set();
+
+// Default achievement definitions (id, emoji, title, desc, condition hint)
+// Users can customize `title` and `desc` text only.
+const DEFAULT_ACHIEVEMENTS=[
+  {id:'first_task',  emoji:'🐣', title:'破壳！',           desc:'完成了第一个任务',         type:'tasks_today', threshold:1,   thresholdLabel:'今日完成任务数 ≥'},
+  {id:'first_bingo', emoji:'🎯', title:'今天没有遗憾了！',  desc:'第一次连线成功',           type:'lines_today', threshold:1,   thresholdLabel:'今日连线数 ≥'},
+  {id:'bingo2',      emoji:'🧋', title:'奖励自己一杯奶茶！',desc:'单日连成2条线',            type:'lines_today', threshold:2,   thresholdLabel:'今日连线数 ≥'},
+  {id:'bingo3',      emoji:'🔥', title:'今天超神了！',      desc:'单日连成3条线',            type:'lines_today', threshold:3,   thresholdLabel:'今日连线数 ≥'},
+  {id:'bingo5',      emoji:'👑', title:'无敌！今天封神！',  desc:'单日连成5条线',            type:'lines_today', threshold:5,   thresholdLabel:'今日连线数 ≥'},
+  {id:'full_board',  emoji:'💎', title:'完美主义者！',      desc:'完成格子里所有任务',        type:'full_board',  threshold:1,   thresholdLabel:null},
+  {id:'streak3',     emoji:'📅', title:'三天不间断！',      desc:'连续打卡至少完成1个Bingo',  type:'streak',      threshold:3,   thresholdLabel:'连续打卡天数 ≥'},
+  {id:'streak7',     emoji:'🌙', title:'七日无敌连击！',    desc:'连续打卡至少完成1个Bingo',  type:'streak',      threshold:7,   thresholdLabel:'连续打卡天数 ≥'},
+  {id:'streak30',    emoji:'🏔️',title:'一个月的坚持！',    desc:'连续打卡至少完成1个Bingo',  type:'streak',      threshold:30,  thresholdLabel:'连续打卡天数 ≥'},
+  {id:'tasks50',     emoji:'⚡', title:'半百里程碑！',      desc:'累计完成50个任务',          type:'tasks_total', threshold:50,  thresholdLabel:'累计完成任务数 ≥'},
+  {id:'tasks100',    emoji:'🌈', title:'百炼成钢！',        desc:'累计完成100个任务',         type:'tasks_total', threshold:100, thresholdLabel:'累计完成任务数 ≥'},
+  {id:'tasks365',    emoji:'🌟', title:'年度传说！',        desc:'累计完成365个任务',         type:'tasks_total', threshold:365, thresholdLabel:'累计完成任务数 ≥'},
+  {id:'early_bird',  emoji:'🌅', title:'早起的鸟儿！',      desc:'在指定时刻前完成任务',      type:'hour_before', threshold:8,   thresholdLabel:'完成任务时刻 早于（点）'},
+  {id:'night_owl',   emoji:'🦉', title:'夜枭模式！',        desc:'在指定时刻后完成任务',      type:'hour_after',  threshold:0,   thresholdLabel:'完成任务时刻 晚于（点）'},
+  {id:'mandatory1',  emoji:'🛡️',title:'责任感满满！',      desc:'完成了必做任务',            type:'mandatory',   threshold:1,   thresholdLabel:null},
+];
+// User-customizable: {id: {title?, desc?, threshold?, emoji?}}
+let achCustom={};
+// User-created achievements: [{id,emoji,title,desc,type,threshold,thresholdLabel}]
+let achUserDefined=[];
+
+function getAch(id){
+  const base=DEFAULT_ACHIEVEMENTS.find(a=>a.id===id)||achUserDefined.find(a=>a.id===id)||{id,emoji:'🏅',title:id,desc:'',type:'',threshold:1,thresholdLabel:null};
+  const custom=achCustom[id]||{};
+  return{...base,...custom};
+}
+function allAchievements(){return [...DEFAULT_ACHIEVEMENTS,...achUserDefined];}
 
 // Task groups: [{name:string, tasks:[{name,active}]}]
 let groups=[{name:'默认分组', tasks: DEFAULT_TASKS.slice(0,25).map(n=>({name:n,active:true}))}];
@@ -432,18 +693,59 @@ let groups=[{name:'默认分组', tasks: DEFAULT_TASKS.slice(0,25).map(n=>({name
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const activeDate=()=>viewingDate||todayStr();
-const activeKey=()=>KP+activeDate();
 const ls={
   get:k=>{try{return localStorage.getItem(k);}catch(e){return null;}},
   set:(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}},
 };
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
-// ── Storage ───────────────────────────────────────────────────────────────────
+// ── User prefix (per-user data isolation) ─────────────────────────────────────
+function userPrefix(){return currentUser?KP+'u_'+currentUser.username+'_':KP;}
+// Per-user key (daily state keys use user prefix)
+const activeKey=()=>userPrefix()+activeDate();
+
+// ── Version migration ─────────────────────────────────────────────────────────
+function runMigration(){
+  const storedVer=ls.get(K.ver)||'1.0.0';
+  if(storedVer===APP_VERSION)return;
+  // v3.0.0: migrate details keys from numeric index → task name
+  try{
+    // Try both global and user-prefixed detail keys
+    const keysToMigrate=[K.detail];
+    // Also migrate for any logged-in users found in storage
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith(KP+'u_')&&k.endsWith('_details'))keysToMigrate.push(k);
+    }
+    keysToMigrate.forEach(dKey=>{
+      const gKey=dKey.replace('_details','_groups').replace(K.detail,K.groups);
+      const gRaw=ls.get(gKey)||ls.get(K.groups);
+      const dRaw=ls.get(dKey);
+      if(!gRaw||!dRaw)return;
+      const grps=JSON.parse(gRaw),dets=JSON.parse(dRaw);
+      const active=[];
+      for(const g of grps)for(const t of g.tasks)if(t.active)active.push(t.name);
+      const newDets={};let changed=false;
+      for(const [k,v] of Object.entries(dets)){
+        const n=parseInt(k);
+        if(!isNaN(n)&&n>=0&&n<active.length&&active[n]){
+          if(!newDets[active[n]]){newDets[active[n]]=v;changed=true;}
+        } else {newDets[k]=v;}
+      }
+      if(changed)ls.set(dKey,JSON.stringify(newDets));
+    });
+  }catch(e){console.warn('Migration v3 error:',e);}
+  ls.set(K.ver,APP_VERSION);
+}
 function load(){
   try{
     const s=ls.get(activeKey());
-    if(s){const d=JSON.parse(s);if(Array.isArray(d.state))state=d.state;if(Array.isArray(d.order))order=d.order;}
+    if(s){
+      const d=JSON.parse(s);
+      if(Array.isArray(d.state))state=d.state;
+      if(Array.isArray(d.order))order=d.order;
+      if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){gridSize=d.gridSize;updateSizeBtns();}
+    }
   }catch(e){}
   if(state.length!==totalCells()){state=Array(totalCells()).fill(false);}
   if(order.length!==totalCells()){order=[...Array(totalCells()).keys()];}
@@ -458,19 +760,46 @@ function save(){
       const checkedNames=new Set();
       for(let pos=0;pos<totalCells();pos++){if(state[pos])checkedNames.add(getTaskName(pos));}
       timestamps[d]=timestamps[d].filter(e=>checkedNames.has(e.name));
-      ls.set(K.ts,JSON.stringify(timestamps));
+      ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
     }
   }catch(e){}
 }
 function loadAll(){
-  try{const s=ls.get(K.groups);if(s)groups=JSON.parse(s);}catch(e){}
-  try{const s=ls.get(K.detail);if(s)details=JSON.parse(s);}catch(e){}
-  try{const s=ls.get(K.mand);if(s)mandatory=new Set(JSON.parse(s));}catch(e){}
+  runMigration();
+  // Load user
+  try{const s=ls.get(K.user);if(s){currentUser=JSON.parse(s);updateUserBadge();}}catch(e){}
+  // Use user-specific keys if available
+  const gKey=currentUser?KP+'u_'+currentUser.username+'_groups':K.groups;
+  const dKey=currentUser?KP+'u_'+currentUser.username+'_details':K.detail;
+  const mKey=currentUser?KP+'u_'+currentUser.username+'_mandatory':K.mand;
+  const tKey=currentUser?KP+'u_'+currentUser.username+'_timestamps':K.ts;
+  try{const s=ls.get(gKey)||ls.get(K.groups);if(s)groups=JSON.parse(s);}catch(e){}
+  // Sanitize: remove any corrupt entries where group/task name looks like drag data (e.g. "task:0:25" or "0,25")
+  groups=groups.filter(g=>g&&typeof g.name==='string');
+  let _sanitized=false;
+  groups.forEach(g=>{
+    if(/^(task:\d+:\d+|\d+,\d+)$/.test(g.name.trim())){g.name='新分组';_sanitized=true;}
+    const before=g.tasks.length;
+    g.tasks=(g.tasks||[]).filter(t=>t&&typeof t.name==='string'&&t.name.trim()&&!/^(task:\d+:\d+|\d+,\d+)$/.test(t.name.trim()));
+    if(g.tasks.length!==before)_sanitized=true;
+  });
+  if(_sanitized)ls.set(getUserKey('groups'),JSON.stringify(groups));
+  try{const s=ls.get(dKey)||ls.get(K.detail);if(s)details=JSON.parse(s);}catch(e){}
+  try{const s=ls.get(mKey)||ls.get(K.mand);if(s)mandatory=new Set(JSON.parse(s));}catch(e){}
   try{const s=ls.get(K.name);if(s){appName=s;document.getElementById('titleDisplay').textContent=s;document.title=s;}}catch(e){}
-  try{const s=ls.get(K.ts);if(s)timestamps=JSON.parse(s);}catch(e){}
+  try{const s=ls.get(tKey)||ls.get(K.ts);if(s)timestamps=JSON.parse(s);}catch(e){}
   try{const s=ls.get(K.size);if(s){gridSize=parseInt(s)||5;updateSizeBtns();}}catch(e){}
-  // Clean up today's stale timestamps (legacy bug: too many entries)
-  // Will be properly re-synced after load() + save() on first interaction
+  try{const s=ls.get(getUserKey('achievements'));if(s){const d=JSON.parse(s);achUnlocked=new Set(d.unlocked||[]);achCustom=d.custom||{};achUserDefined=d.userDefined||[];}}catch(e){}
+}
+
+// User-specific save keys
+function getUserKey(base){return currentUser?KP+'u_'+currentUser.username+'_'+base:base;}
+
+function saveUserData(){
+  // Save groups/details/mandatory under user prefix
+  ls.set(getUserKey('groups'),JSON.stringify(groups));
+  ls.set(getUserKey('details'),JSON.stringify(details));
+  ls.set(getUserKey('mandatory'),JSON.stringify([...mandatory]));
 }
 function recordTS(name){
   const d=activeDate();if(!timestamps[d])timestamps[d]=[];
@@ -478,12 +807,12 @@ function recordTS(name){
   const idx=timestamps[d].findIndex(e=>e.name===name);
   if(idx>=0)timestamps[d][idx].time=t;
   else timestamps[d].push({name,time:t});
-  ls.set(K.ts,JSON.stringify(timestamps));
+  ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
 }
 function removeTS(name){
   const d=activeDate();if(!timestamps[d])return;
   timestamps[d]=timestamps[d].filter(e=>e.name!==name);
-  ls.set(K.ts,JSON.stringify(timestamps));
+  ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
 }
 
 // ── Task helpers ──────────────────────────────────────────────────────────────
@@ -496,22 +825,31 @@ function getTaskName(pos){
   const a=getActiveTasks(),idx=order[pos];
   return (idx<a.length)?a[idx]:'';
 }
-function getDetail(idx){return details[String(idx)]||{notes:'',todos:[]};}
-function hasNoteOrTodo(idx){const d=getDetail(idx);return d.notes.trim()!==''||(d.todos&&d.todos.length>0);}
+function getDetail(taskName){return details[taskName]||{notes:'',todos:[]};}
+function hasNoteOrTodo(taskName){const d=getDetail(taskName);return d.notes.trim()!==''||(d.todos&&d.todos.length>0);}
 
 // ── Viewing date ──────────────────────────────────────────────────────────────
 function setViewingDate(ds){
   viewingDate=(ds===todayStr())?null:ds;
-  // save today first
   if(!viewingDate){
-    // restoring today: re-load today's data
+    // restoring today: re-load today's data with current gridSize
     load();
   } else {
-    // load that day
+    // load that day — restore gridSize saved with that day's data
     try{
-      const s=ls.get(KP+ds);
-      if(s){const d=JSON.parse(s);if(Array.isArray(d.state))state=d.state;if(Array.isArray(d.order))order=d.order;}
-      else{state=Array(totalCells()).fill(false);order=[...Array(totalCells()).keys()];}
+      const s=ls.get(activeKey()); // activeKey() now uses viewingDate
+      if(s){
+        const d=JSON.parse(s);
+        if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){
+          gridSize=d.gridSize;
+          updateSizeBtns();
+        }
+        if(Array.isArray(d.state))state=d.state;
+        if(Array.isArray(d.order))order=d.order;
+      } else {
+        state=Array(totalCells()).fill(false);
+        order=[...Array(totalCells()).keys()];
+      }
     }catch(e){state=Array(totalCells()).fill(false);order=[...Array(totalCells()).keys()];}
     if(state.length!==totalCells()){state=Array(totalCells()).fill(false);}
     if(order.length!==totalCells()){order=[...Array(totalCells()).keys()];}
@@ -546,7 +884,10 @@ function setSize(n){
   prevLines=0;updateSizeBtns();save();buildGrid();render();
 }
 function updateSizeBtns(){
-  [3,4,5,6].forEach(n=>{const b=document.getElementById('sz'+n);if(b)b.classList.toggle('active',n===gridSize);});
+  [3,4,5,6].forEach(n=>{
+    const b=document.getElementById('sz'+n);if(b)b.classList.toggle('active',n===gridSize);
+    const b2=document.getElementById('tpsz'+n);if(b2)b2.classList.toggle('active',n===gridSize);
+  });
 }
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
@@ -626,70 +967,288 @@ function handleTap(pos){
   else{clearTimeout(tapTimer);tapPos=pos;tapTimer=setTimeout(()=>{tapTimer=null;tapPos=-1;toggle(pos);},300);}
 }
 
-// ── Task panel ────────────────────────────────────────────────────────────────
-function openTaskPanel(){renderTaskPanel();document.getElementById('taskOverlay').classList.add('open');document.getElementById('taskPanel').classList.add('open');}
-function closeTaskPanel(){document.getElementById('taskOverlay').classList.remove('open');document.getElementById('taskPanel').classList.remove('open');}
+// Group colors
+const GROUP_COLORS=[
+  {border:'#89cff0',bg:'#e4f4fd',fg:'#3a8fc4'},
+  {border:'#7dcfaa',bg:'#e4f7ef',fg:'#4aaa80'},
+  {border:'#f7c97e',bg:'#fef6e4',fg:'#c8882a'},
+  {border:'#b39ddb',bg:'#f0ebfa',fg:'#7b5ea7'},
+  {border:'#f4967e',bg:'#fdeee9',fg:'#c06040'},
+  {border:'#f48fb1',bg:'#fde8ef',fg:'#c0607a'},
+];
+
+function openTaskPanel(){
+  updateSizeBtns();
+  renderTaskPanel();
+  document.getElementById('taskOverlay').classList.add('open');
+  document.getElementById('taskPanel').classList.add('open');
+  setupTrashZone();
+  _installPanelTouchHandler();
+}
+function closeTaskPanel(){
+  document.getElementById('taskOverlay').classList.remove('open');
+  document.getElementById('taskPanel').classList.remove('open');
+  _dragCleanup();
+}
+
+function setupTrashZone(){
+  const zone=document.getElementById('trashZone');
+  if(!zone||zone._setup)return;
+  zone._setup=true;
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-active');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag-active'));
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();zone.classList.remove('drag-active','visible');
+    const raw=e.dataTransfer.getData('text/plain');
+    const parts=raw.split(',');
+    if(parts.length!==2)return;
+    const gi=parseInt(parts[0]),ti=parseInt(parts[1]);
+    if(isNaN(gi)||isNaN(ti)||!groups[gi]||!groups[gi].tasks[ti])return;
+    const name=groups[gi].tasks[ti].name;
+    groups[gi].tasks.splice(ti,1);
+    ls.set(getUserKey('groups'),JSON.stringify(groups));
+    renderTaskPanel();
+    showToast(`已删除「${name}」🗑️`);
+  });
+}
 
 function renderTaskPanel(){
   const body=document.getElementById('taskPanelBody');
   body.innerHTML='';
+  body._touchInstalled=false; // reset so handler reinstalls after DOM rebuild
   const active=getActiveTasks().length;
   const hint=document.createElement('div');hint.className='task-count-hint';hint.id='taskCountHint';
   hint.textContent=`已选 ${active} 个（Bingo 使用前 ${totalCells()} 个）`;
   body.appendChild(hint);
   groups.forEach((grp,gi)=>{
+    const gc=GROUP_COLORS[gi%GROUP_COLORS.length];
     const gh=document.createElement('div');gh.className='group-header';
-    gh.innerHTML=`<span style="color:var(--text-lt);font-size:.85rem">▸</span><input class="group-name-input" value="${escHtml(grp.name)}" maxlength="20" autocomplete="off" onchange="renameGroup(${gi},this.value)" onblur="renameGroup(${gi},this.value)"/>${groups.length>1?`<button class="group-del-btn" onclick="deleteGroup(${gi})">✕</button>`:''}`;
+    gh.style.cssText=`border-left-color:${gc.border};background:${gc.bg};`;
+    // Count active in group
+    const grpActive=grp.tasks.filter(t=>t.active).length;
+    const allSel=grpActive===grp.tasks.length;
+    gh.innerHTML=`<span style="color:${gc.border};font-size:.85rem">▸</span><input class="group-name-input" value="${escHtml(grp.name)}" maxlength="20" autocomplete="off" style="color:${gc.fg}" onchange="renameGroup(${gi},this.value)" onblur="renameGroup(${gi},this.value)"/><div class="group-controls"><button class="group-sel-all" onclick="toggleGroupSelect(${gi})" style="background:${allSel?gc.border:'transparent'};color:${allSel?'#fff':gc.fg};border:1.5px solid ${gc.border}">${allSel?'取消':'全选'}</button>${groups.length>1?`<button class="group-del-btn" onclick="deleteGroup(${gi})">✕</button>`:''}</div>`;
     body.appendChild(gh);
     const wrap=document.createElement('div');wrap.className='task-bubble-wrap';wrap.dataset.group=gi;
-    grp.tasks.forEach((task,ti)=>wrap.appendChild(makeBubbleEl(gi,ti,task)));
+    grp.tasks.forEach((task,ti)=>wrap.appendChild(makeBubbleEl(gi,ti,task,gc)));
     body.appendChild(wrap);
     const addRow=document.createElement('div');addRow.className='task-add-row';
-    addRow.innerHTML=`<input class="task-add-input" placeholder="添加任务…" maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')addTaskToGroup(${gi},this)"/><button class="task-add-btn" onclick="addTaskToGroup(${gi},this.previousElementSibling)">+</button>`;
+    addRow.innerHTML=`<input class="task-add-input" placeholder="添加任务…" maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')addTaskToGroup(${gi},this)"/><button class="task-add-btn" onclick="addTaskToGroup(${gi},this.previousElementSibling)" style="background:${gc.border}">+</button>`;
     body.appendChild(addRow);
   });
   const agb=document.createElement('button');agb.className='add-group-btn';agb.onclick=addGroup;agb.innerHTML='＋ 新建分组';
   body.appendChild(agb);
 }
 
-function makeBubbleEl(gi,ti,task){
+// ── Bubble drag: single delegated handler on panel body ───────────────────────
+let _drag={active:false,gi:-1,ti:-1,ghost:null,startX:0,startY:0,moved:false,lpTimer:null};
+
+function _dragCleanup(){
+  clearTimeout(_drag.lpTimer);_drag.lpTimer=null;
+  if(_drag.ghost){_drag.ghost.remove();_drag.ghost=null;}
+  _drag.active=false;_drag.moved=false;
+  const pb=document.getElementById('taskPanelBody');if(pb)pb.style.overflow='';
+  const tz=document.getElementById('trashZone');if(tz)tz.classList.remove('visible','drag-active');
+  document.querySelectorAll('.dragging-bubble,.drag-over-bubble').forEach(el=>el.classList.remove('dragging-bubble','drag-over-bubble'));
+}
+
+function _installPanelTouchHandler(){
+  const pb=document.getElementById('taskPanelBody');
+  if(!pb||pb._touchInstalled)return;
+  pb._touchInstalled=true;
+
+  pb.addEventListener('touchstart',ev=>{
+    const touch=ev.touches[0];
+    const bel=touch.target.closest('.task-bubble');
+    if(!bel)return;
+    _drag.gi=+bel.dataset.gi;_drag.ti=+bel.dataset.ti;
+    _drag.startX=touch.clientX;_drag.startY=touch.clientY;
+    _drag.moved=false;_drag.active=false;
+    clearTimeout(_drag.lpTimer);
+    _drag.lpTimer=setTimeout(()=>{
+      _drag.lpTimer=null;
+      if(!_drag.moved&&!_drag.active){
+        const gi=_drag.gi,ti=_drag.ti;
+        if(gi>=0&&ti>=0&&groups[gi]&&groups[gi].tasks[ti]){
+          vibrate(40);
+          const name=groups[gi].tasks[ti].name;
+          showConfirm(`删除「${name}」？`,()=>{
+            if(groups[gi]&&groups[gi].tasks[ti]&&groups[gi].tasks[ti].name===name){
+              groups[gi].tasks.splice(ti,1);
+              ls.set(getUserKey('groups'),JSON.stringify(groups));
+              renderTaskPanel();
+              showToast(`已删除「${name}」🗑️`);
+            }
+          });
+        }
+      }
+    },500);
+  },{passive:true});
+
+  pb.addEventListener('touchmove',ev=>{
+    if(_drag.gi<0)return;
+    const touch=ev.touches[0];
+    const dx=touch.clientX-_drag.startX,dy=touch.clientY-_drag.startY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+
+    if(dist>3)_drag.moved=true; // any movement cancels long-press
+    if(_drag.moved)clearTimeout(_drag.lpTimer);
+
+    if(!_drag.active&&dist>12){
+      // start drag
+      _drag.active=true;
+      ev.preventDefault(); // stop scroll
+      const bel=pb.querySelector(`.task-bubble[data-gi="${_drag.gi}"][data-ti="${_drag.ti}"]`);
+      if(!bel)return;
+      pb.style.overflow='hidden';
+      const r=bel.getBoundingClientRect();
+      if(_drag.ghost)_drag.ghost.remove();
+      _drag.ghost=bel.cloneNode(true);
+      _drag.ghost.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.12);transition:none;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.18);`;
+      document.body.appendChild(_drag.ghost);
+      bel.style.opacity='.25';
+      const tz=document.getElementById('trashZone');if(tz)tz.classList.add('visible');
+    }
+
+    if(_drag.active&&_drag.ghost){
+      ev.preventDefault();
+      const gw=_drag.ghost.offsetWidth,gh=_drag.ghost.offsetHeight;
+      _drag.ghost.style.left=(touch.clientX-gw/2)+'px';
+      _drag.ghost.style.top=(touch.clientY-gh/2)+'px';
+      // hide ghost temporarily to find target
+      _drag.ghost.style.display='none';
+      const hit=document.elementFromPoint(touch.clientX,touch.clientY);
+      _drag.ghost.style.display='';
+      document.querySelectorAll('.drag-over-bubble,.drag-active').forEach(el=>el.classList.remove('drag-over-bubble','drag-active'));
+      if(hit){
+        const tb=hit.closest('.task-bubble');
+        const tz=hit.closest('.task-trash-zone');
+        if(tb)tb.classList.add('drag-over-bubble');
+        if(tz)tz.classList.add('drag-active');
+      }
+    }
+  },{passive:false});
+
+  pb.addEventListener('touchend',ev=>{
+    clearTimeout(_drag.lpTimer);_drag.lpTimer=null;
+    if(_drag.active){
+      const touch=ev.changedTouches[0];
+      const gi=_drag.gi,ti=_drag.ti;
+      _dragCleanup();
+      // restore source bubble opacity
+      const src=pb.querySelector(`.task-bubble[data-gi="${gi}"][data-ti="${ti}"]`);
+      if(src)src.style.opacity='';
+      // find drop target
+      const hit=document.elementFromPoint(touch.clientX,touch.clientY);
+      if(hit&&gi>=0&&ti>=0&&groups[gi]&&groups[gi].tasks[ti]){
+        const trash=hit.closest('.task-trash-zone');
+        const tb=hit.closest('.task-bubble');
+        if(trash){
+          const name=groups[gi].tasks[ti].name;
+          groups[gi].tasks.splice(ti,1);
+          ls.set(getUserKey('groups'),JSON.stringify(groups));
+          renderTaskPanel();showToast(`已删除「${name}」🗑️`);
+        } else if(tb){
+          const tgi=+tb.dataset.gi,tti=+tb.dataset.ti;
+          if(!isNaN(tgi)&&!isNaN(tti)&&!(tgi===gi&&tti===ti)){
+            const m=groups[gi].tasks.splice(ti,1)[0];
+            groups[tgi].tasks.splice(tti,0,m);
+            ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();
+          }
+        }
+      }
+    }
+    _drag.gi=-1;_drag.ti=-1;_drag.moved=false;
+  },{passive:true});
+
+  pb.addEventListener('touchcancel',()=>{
+    clearTimeout(_drag.lpTimer);_drag.lpTimer=null;
+    _dragCleanup();
+    _drag.gi=-1;_drag.ti=-1;_drag.moved=false;
+  },{passive:true});
+}
+
+function makeBubbleEl(gi,ti,task,gc){
   const b=document.createElement('div');
   b.className='task-bubble'+(task.active?' active-bubble':'');
-  b.draggable=true;b.dataset.gi=gi;b.dataset.ti=ti;
-  b.innerHTML=`<span>${escHtml(task.name)}</span><button class="bubble-del" onclick="event.stopPropagation();deleteTask(${gi},${ti})">✕</button>`;
-  b.addEventListener('click',()=>toggleTaskActive(gi,ti));
-  b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',`${gi},${ti}`);b.classList.add('dragging-bubble');});
-  b.addEventListener('dragend',()=>b.classList.remove('dragging-bubble'));
+  if(gc&&!task.active){b.style.background=gc.bg;b.style.color=gc.fg;b.style.borderColor=gc.border+'55';}
+  b.dataset.gi=String(gi);b.dataset.ti=String(ti);
+  b.innerHTML=`<span>${escHtml(task.name)}</span><button class="bubble-del" onclick="event.stopPropagation();bubbleDelete(${gi},${ti})">✕</button>`;
+  // Click for desktop only — suppress on touch to avoid double-toggle
+  b.addEventListener('click',e=>{
+    if(e.sourceCapabilities&&!e.sourceCapabilities.firesTouchEvents){
+      toggleTaskActive(gi,ti);
+    } else if(!('ontouchstart' in window)){
+      toggleTaskActive(gi,ti);
+    }
+  });
+  b.addEventListener('contextmenu',e=>{e.preventDefault();openTaskJournal(task.name);});
+  // Desktop HTML5 drag
+  b.draggable=true;
+  b.addEventListener('dragstart',e=>{
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',`${gi},${ti}`);
+    const tz=document.getElementById('trashZone');if(tz)tz.classList.add('visible');
+    setTimeout(()=>b.style.opacity='.3',0);
+  });
+  b.addEventListener('dragend',()=>{
+    b.style.opacity='';
+    const tz=document.getElementById('trashZone');if(tz)tz.classList.remove('visible','drag-active');
+  });
   b.addEventListener('dragover',e=>{e.preventDefault();b.classList.add('drag-over-bubble');});
   b.addEventListener('dragleave',()=>b.classList.remove('drag-over-bubble'));
   b.addEventListener('drop',e=>{
     e.preventDefault();b.classList.remove('drag-over-bubble');
-    const [sgi,sti]=e.dataTransfer.getData('text/plain').split(',').map(Number);
-    const tgi=parseInt(b.dataset.gi),tti=parseInt(b.dataset.ti);
+    const parts=e.dataTransfer.getData('text/plain').split(',');
+    const sgi=parseInt(parts[0]),sti=parseInt(parts[1]);
+    if(isNaN(sgi)||isNaN(sti))return;
+    const tgi=+b.dataset.gi,tti=+b.dataset.ti;
     if(sgi===tgi&&sti===tti)return;
     const moved=groups[sgi].tasks.splice(sti,1)[0];
     groups[tgi].tasks.splice(tti,0,moved);
-    ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();
+    ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();
   });
   return b;
 }
 
-function toggleTaskActive(gi,ti){groups[gi].tasks[ti].active=!groups[gi].tasks[ti].active;ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
-function renameGroup(gi,v){if(v.trim())groups[gi].name=v.trim();ls.set(K.groups,JSON.stringify(groups));}
-function renameTask(gi,ti,v){if(v.trim())groups[gi].tasks[ti].name=v.trim();ls.set(K.groups,JSON.stringify(groups));}
-function deleteTask(gi,ti){groups[gi].tasks.splice(ti,1);ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
-function deleteGroup(gi){if(!confirm(`删除「${groups[gi].name}」分组？`))return;groups.splice(gi,1);ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
-function addGroup(){groups.push({name:'新分组',tasks:[]});ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
-function addTaskToGroup(gi,inp){const n=inp.value.trim();if(!n)return;groups[gi].tasks.push({name:n,active:true});inp.value='';ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();inp.focus();}
-function selectAllTasks(val){groups.forEach(g=>g.tasks.forEach(t=>t.active=val));ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
+function toggleTaskActive(gi,ti){groups[gi].tasks[ti].active=!groups[gi].tasks[ti].active;ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();}
+function bubbleDelete(gi,ti){
+  if(!groups[gi]||!groups[gi].tasks[ti])return;
+  const name=groups[gi].tasks[ti].name;
+  showConfirm(`删除「${name}」？`,()=>{
+    if(groups[gi]&&groups[gi].tasks[ti]&&groups[gi].tasks[ti].name===name){
+      groups[gi].tasks.splice(ti,1);
+      ls.set(getUserKey('groups'),JSON.stringify(groups));
+      renderTaskPanel();showToast(`已删除「${name}」`);
+    }
+  });
+}
+function toggleGroupSelect(gi){
+  const allSel=groups[gi].tasks.every(t=>t.active);
+  groups[gi].tasks.forEach(t=>t.active=!allSel);
+  ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();
+}
+function renameGroup(gi,v){if(v.trim())groups[gi].name=v.trim();ls.set(getUserKey('groups'),JSON.stringify(groups));}
+function renameTask(gi,ti,v){if(v.trim())groups[gi].tasks[ti].name=v.trim();ls.set(getUserKey('groups'),JSON.stringify(groups));}
+function deleteTask(gi,ti){groups[gi].tasks.splice(ti,1);ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();}
+function deleteGroup(gi){
+  // confirm() is blocked in iOS PWA — use a custom confirm instead
+  showConfirm(`删除「${groups[gi].name}」分组？`, ()=>{
+    groups.splice(gi,1);ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();
+  });
+}
+function addGroup(){groups.push({name:'新分组',tasks:[]});ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();}
+function addTaskToGroup(gi,inp){const n=inp.value.trim();if(!n)return;groups[gi].tasks.push({name:n,active:true});inp.value='';ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();inp.focus();}
+function selectAllTasks(val){groups.forEach(g=>g.tasks.forEach(t=>t.active=val));ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();}
 function applyTaskSelection(){order=[...Array(totalCells()).keys()];state=Array(totalCells()).fill(false);prevLines=0;save();closeTaskPanel();buildGrid();render();showToast('任务列表已更新 ✓');}
 
 // ── Detail panel ──────────────────────────────────────────────────────────────
 function openDetail(pos){
-  detailPos=pos;const idx=order[pos];const d=getDetail(idx);
-  document.getElementById('detailSheetTitle').textContent='✏️ '+getTaskName(pos);
-  document.getElementById('detailNameInput').value=getTaskName(pos);
+  detailPos=pos;const taskName=getTaskName(pos);const d=getDetail(taskName);
+  document.getElementById('detailSheetTitle').textContent='✏️ '+taskName;
+  document.getElementById('detailNameInput').value=taskName;
   document.getElementById('detailDoneToggle').checked=state[pos];
+  const idx=order[pos];
   document.getElementById('detailMandatoryToggle').checked=mandatory.has(idx);
   document.getElementById('detailNotes').value=d.notes||'';
   renderTodoList(d.todos||[]);
@@ -706,45 +1265,137 @@ function deleteTodo(i){const t=getCurrentTodos();t.splice(i,1);renderTodoList(t)
 function addTodo(){const inp=document.getElementById('todoAddInput');const text=inp.value.trim();if(!text)return;renderTodoList([...getCurrentTodos(),{text,done:false}]);inp.value='';inp.focus();}
 
 function saveDetail(){
-  if(detailPos<0)return;const idx=order[detailPos];
-  const newName=document.getElementById('detailNameInput').value.trim();
-  if(newName){
-    // find and rename in groups
-    outer:for(const g of groups)for(const t of g.tasks)if(t.name===getTaskName(detailPos)){t.name=newName;ls.set(K.groups,JSON.stringify(groups));break outer;}
+  if(detailPos<0)return;
+  const idx=order[detailPos];
+  const oldName=getTaskName(detailPos);
+  const newName=document.getElementById('detailNameInput').value.trim()||oldName;
+  if(newName!==oldName){
+    // rename in groups
+    outer:for(const g of groups)for(const t of g.tasks)if(t.name===oldName){t.name=newName;ls.set(getUserKey('groups'),JSON.stringify(groups));break outer;}
+    // migrate notes to new name key
+    if(details[oldName]){details[newName]=details[oldName];delete details[oldName];}
   }
   const isDone=document.getElementById('detailDoneToggle').checked,wasDone=state[detailPos];
   state[detailPos]=isDone;
-  if(isDone&&!wasDone)recordTS(newName||getTaskName(detailPos));
-  if(!isDone&&wasDone)removeTS(getTaskName(detailPos));
+  if(isDone&&!wasDone)recordTS(newName);
+  if(!isDone&&wasDone)removeTS(newName);
   const isMand=document.getElementById('detailMandatoryToggle').checked;
   if(isMand)mandatory.add(idx);else mandatory.delete(idx);
-  ls.set(K.mand,JSON.stringify([...mandatory]));
-  details[String(idx)]={notes:document.getElementById('detailNotes').value,todos:getCurrentTodos()};
-  ls.set(K.detail,JSON.stringify(details));save();
+  ls.set(getUserKey('mandatory'),JSON.stringify([...mandatory]));
+  details[newName]={notes:document.getElementById('detailNotes').value,todos:getCurrentTodos()};
+  ls.set(getUserKey('details'),JSON.stringify(details));save();
   if(isDone&&!wasDone){vibrate([30,60]);const c=document.querySelector(`.cell[data-i="${detailPos}"]`);if(c){burstParticles(c);playComplete();}showCheer();}
-  closeDetail();render();buildGrid();showToast('已保存 ✓');
+  closeDetail();render();buildGrid();checkAchievements();showToast('已保存 ✓');
 }
 
-// ── History ───────────────────────────────────────────────────────────────────
+// ── Task Journal ──────────────────────────────────────────────────────────────
+function openTaskJournal(taskName){
+  document.getElementById('taskJournalTitle').textContent=`📓 ${taskName}`;
+  const body=document.getElementById('taskJournalBody');
+  body.innerHTML='';
+
+  // Gather all dates that have data
+  const prefix=userPrefix(),skip=new Set(Object.values(K));
+  const entries=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key.startsWith(prefix)||skip.has(key))continue;
+    const d=key.replace(prefix,'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
+    try{
+      const saved=JSON.parse(localStorage.getItem(key));
+      // Find if this task was done on that day
+      const taskOrder=saved.order||[];
+      const taskState=saved.state||[];
+      const active=getActiveTasks();
+      const pos=taskOrder.findIndex(idx=>idx<active.length&&active[idx]===taskName);
+      const done=pos>=0&&taskState[pos];
+      // Notes/todos keyed by task name
+      const det=details[taskName]||null;
+      // Check if there's anything to show: done OR has notes/todos
+      const hasNote=det&&(det.notes?.trim()||det.todos?.length>0);
+      if(done||hasNote){
+        entries.push({dateStr:d,done,notes:det?.notes||'',todos:det?.todos||[]});
+      }
+    }catch(e){}
+  }
+
+  // Also check timestamps for this task name across all dates
+  const allTS=timestamps||{};
+
+  entries.sort((a,b)=>b.dateStr.localeCompare(a.dateStr));
+
+  if(!entries.length){
+    body.innerHTML='<div class="journal-empty">暂无跨日期记录<br>在 Bingo 格子上长按可以添加备注 📝</div>';
+  } else {
+    const W=['日','一','二','三','四','五','六'],M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    entries.forEach(e=>{
+      const dt=new Date(e.dateStr+'T12:00:00');
+      const dateLabel=`${dt.getFullYear()}年${M[dt.getMonth()]}${dt.getDate()}日 周${W[dt.getDay()]}`;
+      const tsEntry=(allTS[e.dateStr]||[]).find(t=>t.name===taskName);
+      const div=document.createElement('div');div.className='journal-entry';
+      let html=`<div class="journal-entry-date"><span class="journal-entry-date-badge">${dateLabel}</span>`;
+      if(e.done)html+=`<span class="journal-entry-done">✓ 已完成${tsEntry?' · '+tsEntry.time:''}</span>`;
+      html+='</div>';
+      if(e.notes)html+=`<div class="journal-entry-notes">${escHtml(e.notes)}</div>`;
+      if(e.todos&&e.todos.length){
+        e.todos.forEach(t=>{
+          html+=`<div class="journal-todo-item${t.done?' journal-todo-done':''}"><span class="journal-todo-check${t.done?' done-check':''}">${t.done?'✓':''}</span>${escHtml(t.text)}</div>`;
+        });
+      }
+      if(!e.notes&&!e.todos?.length&&e.done){
+        html+=`<div style="font-size:.78rem;color:var(--text-lt);font-weight:600">（当天无备注）</div>`;
+      }
+      const isToday=e.dateStr===todayStr();
+      html+=`<button class="journal-jump-btn" onclick="closeTaskJournal();${isToday?'returnToToday()':'setViewingDate(\''+e.dateStr+'\')'}">${isToday?'查看今天 →':`跳转到 ${dt.getMonth()+1}/${dt.getDate()} →`}</button>`;
+      div.innerHTML=html;
+      body.appendChild(div);
+    });
+  }
+  document.getElementById('taskJournalOverlay').classList.add('open');
+  document.getElementById('taskJournalSheet').classList.add('open');
+}
+function closeTaskJournal(){
+  document.getElementById('taskJournalOverlay').classList.remove('open');
+  document.getElementById('taskJournalSheet').classList.remove('open');
+}
 function getAllHistory(){
   const entries=[],skip=new Set(Object.values(K));
+  const prefix=userPrefix();
   for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);if(!key.startsWith(KP)||skip.has(key))continue;
-    const d=key.replace(KP,'');if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
+    const key=localStorage.key(i);if(!key.startsWith(prefix)||skip.has(key))continue;
+    const d=key.replace(prefix,'');if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
     try{entries.push({dateStr:d,...JSON.parse(localStorage.getItem(key))});}catch(e){}
   }
   return entries.sort((a,b)=>b.dateStr.localeCompare(a.dateStr));
 }
 function openHistory(){
   const entries=getAllHistory(),list=document.getElementById('historyList');list.innerHTML='';
-  if(!entries.length){list.innerHTML='<div class="history-empty">还没有记录<br>今天完成第一项就会自动保存 ✨</div>';return;}
+  if(!entries.length){list.innerHTML='<div class="history-empty">还没有记录<br>今天完成第一项就会自动保存 ✨</div>';
+    document.getElementById('historyOverlay').classList.add('open');document.getElementById('historySheet').classList.add('open');return;}
   const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  list.innerHTML+='<div class="history-longpress-hint">💡 双击或长按日期可跳转到当天的 Bingo 格子</div>';
   entries.forEach(e=>{
     const dt=new Date(e.dateStr+'T12:00:00'),isToday=e.dateStr===todayStr();
     const done=e.done??(e.state?e.state.filter(Boolean).length:0),lines=e.lines??0,pct=e.pct??Math.min(done*20,100);
     const ts=timestamps[e.dateStr]||[];
     const item=document.createElement('div');item.className='history-item';
-    item.innerHTML=`<div class="history-item-header"><div class="history-date-block"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看完成时间 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>`<div class="history-ts-item"><span class="history-ts-time">${t.time}</span><span>${escHtml(t.name)}</span></div>`).join('')}</div>`:''}`;
+    item.innerHTML=`<div class="history-item-header"><div class="history-date-block" data-date="${e.dateStr}"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看完成时间 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>`<div class="history-ts-item"><span class="history-ts-time">${t.time}</span><span>${escHtml(t.name)}</span></div>`).join('')}</div>`:''}`;
+    // Long-press OR double-click on date block to jump to bingo
+    const dateBlock=item.querySelector('.history-date-block');
+    let lpTimer=null,tapCount=0,tapResetTimer=null;
+    const doJump=()=>{closeHistory();setViewingDate(e.dateStr);showToast(`跳转到 ${dt.getMonth()+1}月${dt.getDate()}日 📅`);};
+    const startLP=()=>{item.classList.add('long-press-active');lpTimer=setTimeout(()=>{lpTimer=null;doJump();},600);};
+    const cancelLP=()=>{clearTimeout(lpTimer);lpTimer=null;item.classList.remove('long-press-active');};
+    dateBlock.addEventListener('mousedown',startLP);dateBlock.addEventListener('mouseup',cancelLP);dateBlock.addEventListener('mouseleave',cancelLP);
+    dateBlock.addEventListener('touchstart',ev=>{ev.preventDefault();startLP();},{passive:false});
+    dateBlock.addEventListener('touchend',cancelLP);dateBlock.addEventListener('touchmove',cancelLP);
+    // Double-click
+    dateBlock.addEventListener('click',()=>{
+      tapCount++;clearTimeout(tapResetTimer);
+      if(tapCount>=2){tapCount=0;doJump();}
+      else tapResetTimer=setTimeout(()=>tapCount=0,400);
+    });
     list.appendChild(item);
   });
   document.getElementById('historyOverlay').classList.add('open');document.getElementById('historySheet').classList.add('open');
@@ -764,9 +1415,10 @@ function calGoToDay(ds){closeCal();setViewingDate(ds);}
 
 function getHistoryMap(){
   const map={},skip=new Set(Object.values(K));
+  const prefix=userPrefix();
   for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);if(!key.startsWith(KP)||skip.has(key))continue;
-    const d=key.replace(KP,'');if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
+    const key=localStorage.key(i);if(!key.startsWith(prefix)||skip.has(key))continue;
+    const d=key.replace(prefix,'');if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
     try{map[d]=JSON.parse(localStorage.getItem(key));}catch(e){}
   }
   return map;
@@ -789,6 +1441,7 @@ function renderCal(){
     el.className='cal-day'+(data?' has-data':'')+(ds===today?' today':'')+(ds===calSelDate?' selected':'');
     el.innerHTML=`<div class="cal-day-num">${d}</div><div class="cal-day-dots">${dotArr.join('')}</div>`;
     el.onclick=()=>{calSelDate=ds;showCalPreview(ds,data);};
+    el.ondblclick=()=>calGoToDay(ds);
     grid.appendChild(el);
   }
   const det=document.getElementById('calDetail');
@@ -845,7 +1498,7 @@ function buildGrid(){
     if(!isEmpty&&!state[pos]&&!locked){c.style.background=pal.bg;c.style.color=pal.color;}
     const span=document.createElement('span');span.className='cell-text';span.textContent=taskName;c.appendChild(span);
     if(isMand&&!isEmpty){const li=document.createElement('span');li.className='lock-icon';li.textContent='⚡';c.appendChild(li);}
-    if(!isEmpty){const dot=document.createElement('span');dot.className='note-dot'+(hasNoteOrTodo(idx)?' show':'');c.appendChild(dot);}
+    if(!isEmpty){const dot=document.createElement('span');dot.className='note-dot'+(hasNoteOrTodo(taskName)?' show':'');c.appendChild(dot);}
     if(!isEmpty){
       c.addEventListener('mousedown',()=>startPress(pos,c));c.addEventListener('mouseup',()=>cancelPress(c));c.addEventListener('mouseleave',()=>cancelPress(c));
       c.addEventListener('touchstart',e=>{e.preventDefault();startPress(pos,c);},{passive:false});
@@ -871,7 +1524,7 @@ function toggle(pos){
   c.addEventListener('animationend',()=>c.classList.remove('pop'),{once:true});
   if(state[pos]){vibrate([30,60]);burstParticles(c);playComplete();showCheer();recordTS(getTaskName(pos));}
   else{vibrate(20);playUndo();removeTS(getTaskName(pos));}
-  render();buildGrid();
+  render();buildGrid();checkAchievements();
 }
 
 // ── Logic ─────────────────────────────────────────────────────────────────────
@@ -903,17 +1556,339 @@ function render(){
   allIdx.forEach(i=>{const c=document.querySelector(`.cell[data-i="${i}"]`);if(c){c.classList.add('bingo-line');c.style.background='';c.style.color='';}});
   document.getElementById('badgeText').textContent=`连成 ${n} 条线！`;
   document.getElementById('bingoBadge').classList.toggle('show',n>0);
-  if(n>prevLines){doConfetti();showCheer(BINGO_CHEERS,bingoQ);vibrate([50,30,80]);playBingo();showToast('🎉 BINGO！！！');}
+  if(n>prevLines){doConfetti();const cheer=nextMsg(BINGO_CHEERS,bingoQ);showBingoModal(n,cheer);vibrate([50,30,80]);playBingo();}
   prevLines=n;
 }
 
 function doShuffle(){for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}state=Array(totalCells()).fill(false);prevLines=0;save();buildGrid();render();showToast('已随机排列 🔀');}
 function doReset(){state=Array(totalCells()).fill(false);prevLines=0;save();buildGrid();render();showToast('已重置');}
 
+// ── Achievements ──────────────────────────────────────────────────────────────
+function saveAch(){ls.set(getUserKey('achievements'),JSON.stringify({unlocked:[...achUnlocked],custom:achCustom,userDefined:achUserDefined}));}
+
+function unlockAch(id){
+  if(achUnlocked.has(id))return;
+  achUnlocked.add(id);
+  saveAch();
+  const a=getAch(id);
+  if(a&&a.title)showAchCard(a);
+}
+
+// Queue so multiple unlocks don't overlap
+let _achForceHideTimer=null;
+function showAchCard(a){
+  if(!a||!a.title)return;
+  const card=document.getElementById('achCard');
+  // Fill content
+  document.getElementById('achCardEmoji').textContent=a.emoji||'🏅';
+  document.getElementById('achCardTitle').textContent=a.title;
+  document.getElementById('achCardDesc').textContent=a.desc||'';
+  // Show
+  card.style.display='block';
+  card.classList.add('show');
+  vibrate([20,40,20]);
+  // Cancel any previous timer
+  clearTimeout(_achForceHideTimer);
+  // Force hide after 1.5s — no exceptions
+  _achForceHideTimer=setTimeout(()=>{
+    card.classList.remove('show');
+    card.style.display='none';
+  },1500);
+}
+function _dismissAchCard(){
+  clearTimeout(_achForceHideTimer);
+  const card=document.getElementById('achCard');
+  card.classList.remove('show');
+  card.style.display='none';
+}
+
+function openAchGallery(){
+  renderAchGallery();
+  document.getElementById('achOverlay').classList.add('open');
+  document.getElementById('achSheet').classList.add('open');
+}
+function closeAchGallery(){
+  document.getElementById('achOverlay').classList.remove('open');
+  document.getElementById('achSheet').classList.remove('open');
+}
+function renderAchGallery(){
+  const body=document.getElementById('achGalleryBody');
+  body.innerHTML='';
+  const all=allAchievements();
+  const got=all.filter(a=>achUnlocked.has(a.id)).length;
+  document.getElementById('achProgress').textContent=`已解锁 ${got} / ${all.length}`;
+
+  // Helper: render one achievement tile
+  function makeTile(base){
+    const a=getAch(base.id);
+    const unlocked=achUnlocked.has(a.id);
+    const el=document.createElement('div');
+    el.className='ach-item'+(unlocked?' unlocked':' locked');
+    const condText=a.thresholdLabel?`${a.thresholdLabel} ${a.threshold}`:'';
+    el.innerHTML=`<span class="ach-item-emoji">${a.emoji}</span><span class="ach-item-title">${a.title}</span>${!unlocked&&condText?`<span class="ach-item-cond">${condText}</span>`:'<span class="ach-item-check">✓</span>'}`;
+    el.title=unlocked?a.desc:(a.thresholdLabel?`${a.thresholdLabel} ${a.threshold}`:a.desc);
+    el.onclick=()=>openAchEdit(base.id,unlocked);
+    return el;
+  }
+
+  // Built-in section
+  const builtinLabel=document.createElement('div');
+  builtinLabel.style.cssText='font-size:.72rem;font-weight:900;color:var(--text-lt);letter-spacing:.05em;padding:4px 2px 8px;';
+  builtinLabel.textContent='内置成就';
+  body.appendChild(builtinLabel);
+  const grid1=document.createElement('div');grid1.className='ach-grid';
+  DEFAULT_ACHIEVEMENTS.forEach(base=>grid1.appendChild(makeTile(base)));
+  body.appendChild(grid1);
+
+  // User-defined section
+  const udLabel=document.createElement('div');
+  udLabel.style.cssText='font-size:.72rem;font-weight:900;color:var(--text-lt);letter-spacing:.05em;padding:16px 2px 8px;display:flex;align-items:center;justify-content:space-between;';
+  udLabel.innerHTML=`<span>自定义成就</span><button onclick="openAddAch()" style="background:var(--amber);color:#fff;border:none;border-radius:99px;padding:4px 12px;font-size:.72rem;font-weight:900;cursor:pointer;">＋ 新建</button>`;
+  body.appendChild(udLabel);
+  if(achUserDefined.length){
+    const grid2=document.createElement('div');grid2.className='ach-grid';
+    achUserDefined.forEach(base=>grid2.appendChild(makeTile(base)));
+    body.appendChild(grid2);
+  } else {
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:16px 0 8px;font-size:.78rem;color:var(--text-lt);font-weight:600;';
+    empty.textContent='点击「＋ 新建」创建你自己的成就 🎖️';
+    body.appendChild(empty);
+  }
+  const hint=document.createElement('div');
+  hint.style.cssText='text-align:center;font-size:.68rem;color:var(--text-lt);font-weight:700;padding:16px 0;';
+  hint.textContent='点击任意成就可编辑 · 长按自定义成就可删除';
+  body.appendChild(hint);
+}
+function openAchEdit(id,unlocked){
+  const a=getAch(id);
+  const base=allAchievements().find(x=>x.id===id);
+  const isUserDef=achUserDefined.some(x=>x.id===id);
+  document.getElementById('achEditBox')?.remove();
+  const hasThreshold=a.thresholdLabel!==null;
+  const overlay=document.createElement('div');overlay.className='ach-edit-overlay';overlay.id='achEditBox';
+  overlay.innerHTML=`<div class="ach-edit-box">
+    <div class="ach-edit-emoji-row">
+      <input class="ach-edit-emoji-input" id="achEditEmoji" value="${a.emoji}" maxlength="4" placeholder="🏅"/>
+      <div>
+        <div style="font-size:.72rem;font-weight:800;color:var(--text-mid);">${unlocked?'✅ 已解锁':'🔒 未解锁'}</div>
+        <div style="font-size:.68rem;color:var(--text-lt);font-weight:600;margin-top:2px;">${isUserDef?'自定义成就':'内置成就'}</div>
+      </div>
+    </div>
+    <div class="ach-edit-field"><label class="ach-edit-label">成就名称</label><input class="ach-edit-input" id="achEditTitle" value="${escHtml(a.title)}" maxlength="20" placeholder="${escHtml(base?base.title:'')}"/></div>
+    <div class="ach-edit-field"><label class="ach-edit-label">解锁描述</label><input class="ach-edit-input" id="achEditDesc" value="${escHtml(a.desc)}" maxlength="40" placeholder="${escHtml(base?base.desc:'')}"/></div>
+    ${hasThreshold?`<div class="ach-edit-field"><label class="ach-edit-label">触发条件：${escHtml(a.thresholdLabel)}</label><input class="ach-edit-input" id="achEditThreshold" type="number" min="1" max="9999" value="${a.threshold}" style="width:100px"/></div>`:''}
+    <div class="ach-edit-btns">
+      <button class="ach-edit-cancel" onclick="document.getElementById('achEditBox').remove()">取消</button>
+      ${isUserDef?`<button class="ach-edit-reset" style="background:var(--coral-lt);color:var(--coral);" onclick="deleteUserAch('${id}')">删除</button>`:`<button class="ach-edit-reset" onclick="resetAchText('${id}')">还原默认</button>`}
+      <button class="ach-edit-save" onclick="saveAchText('${id}')">保存</button>
+    </div>
+  </div>`;
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
+}
+function saveAchText(id){
+  const base=allAchievements().find(x=>x.id===id);
+  const emoji=document.getElementById('achEditEmoji')?.value.trim()||'🏅';
+  const title=document.getElementById('achEditTitle')?.value.trim()||'';
+  const desc=document.getElementById('achEditDesc')?.value.trim()||'';
+  const tEl=document.getElementById('achEditThreshold');
+  const threshold=tEl?Math.max(1,parseInt(tEl.value)||(base?base.threshold:1)):null;
+  const custom={};
+  if(emoji)custom.emoji=emoji;
+  if(title)custom.title=title;
+  if(desc)custom.desc=desc;
+  if(threshold!==null)custom.threshold=threshold;
+  // If user-defined, update directly in achUserDefined
+  const udIdx=achUserDefined.findIndex(x=>x.id===id);
+  if(udIdx>=0){
+    achUserDefined[udIdx]={...achUserDefined[udIdx],...custom};
+  } else {
+    if(Object.keys(custom).length)achCustom[id]={...achCustom[id],...custom};
+  }
+  saveAch();
+  document.getElementById('achEditBox')?.remove();
+  renderAchGallery();
+  showToast('成就已保存 ✓');
+}
+function resetAchText(id){
+  delete achCustom[id];
+  saveAch();
+  document.getElementById('achEditBox')?.remove();
+  renderAchGallery();
+  showToast('已还原默认');
+}
+function deleteUserAch(id){
+  showConfirm('删除这个成就？',()=>{
+    achUserDefined=achUserDefined.filter(a=>a.id!==id);
+    achUnlocked.delete(id);
+    delete achCustom[id];
+    saveAch();
+    document.getElementById('achEditBox')?.remove();
+    renderAchGallery();
+    showToast('已删除');
+  });
+}
+const ACH_TYPES=[
+  {type:'lines_today', label:'今日连线数 ≥', placeholder:'2'},
+  {type:'tasks_today', label:'今日完成任务数 ≥', placeholder:'5'},
+  {type:'tasks_total', label:'累计完成任务数 ≥', placeholder:'100'},
+  {type:'streak',      label:'连续打卡天数 ≥', placeholder:'7'},
+  {type:'hour_before', label:'完成任务时刻 早于（点）', placeholder:'8'},
+  {type:'hour_after',  label:'完成任务时刻 晚于（点）', placeholder:'22'},
+  {type:'full_board',  label:'单日完成所有格子', placeholder:null},
+  {type:'mandatory',   label:'完成必做任务', placeholder:null},
+];
+function openAddAch(){
+  document.getElementById('achEditBox')?.remove();
+  const overlay=document.createElement('div');overlay.className='ach-edit-overlay';overlay.id='achEditBox';
+  const typeOpts=ACH_TYPES.map((t,i)=>`<option value="${i}">${t.label}</option>`).join('');
+  overlay.innerHTML=`<div class="ach-edit-box">
+    <div style="font-size:.9rem;font-weight:900;color:var(--text);margin-bottom:14px;text-align:center;">🎖️ 新建成就</div>
+    <div class="ach-edit-emoji-row">
+      <input class="ach-edit-emoji-input" id="addAchEmoji" value="🏅" maxlength="4"/>
+      <div style="flex:1;">
+        <div class="ach-edit-field" style="margin:0"><label class="ach-edit-label">成就名称</label><input class="ach-edit-input" id="addAchTitle" maxlength="20" placeholder="我的成就"/></div>
+      </div>
+    </div>
+    <div class="ach-edit-field"><label class="ach-edit-label">解锁描述</label><input class="ach-edit-input" id="addAchDesc" maxlength="40" placeholder="达成某件很厉害的事"/></div>
+    <div class="ach-edit-field"><label class="ach-edit-label">触发类型</label>
+      <select class="ach-edit-input" id="addAchType" onchange="updateAddAchThreshold()" style="cursor:pointer;">${typeOpts}</select>
+    </div>
+    <div id="addAchThresholdWrap" class="ach-edit-field">
+      <label class="ach-edit-label" id="addAchThresholdLabel">${ACH_TYPES[0].label}</label>
+      <input class="ach-edit-input" id="addAchThreshold" type="number" min="1" max="9999" value="1" style="width:100px"/>
+    </div>
+    <div class="ach-edit-btns">
+      <button class="ach-edit-cancel" onclick="document.getElementById('achEditBox').remove()">取消</button>
+      <button class="ach-edit-save" onclick="confirmAddAch()">创建</button>
+    </div>
+  </div>`;
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
+}
+function updateAddAchThreshold(){
+  const idx=parseInt(document.getElementById('addAchType').value);
+  const t=ACH_TYPES[idx];
+  const wrap=document.getElementById('addAchThresholdWrap');
+  if(t.placeholder===null){wrap.style.display='none';}
+  else{wrap.style.display='';document.getElementById('addAchThresholdLabel').textContent=t.label;}
+}
+function confirmAddAch(){
+  const emoji=document.getElementById('addAchEmoji').value.trim()||'🏅';
+  const title=document.getElementById('addAchTitle').value.trim();
+  const desc=document.getElementById('addAchDesc').value.trim();
+  const idx=parseInt(document.getElementById('addAchType').value);
+  const t=ACH_TYPES[idx];
+  const threshold=t.placeholder===null?1:Math.max(1,parseInt(document.getElementById('addAchThreshold').value)||1);
+  if(!title){showToast('请填写成就名称');return;}
+  const id='user_'+Date.now();
+  achUserDefined.push({
+    id,emoji,title,desc:desc||title,
+    type:t.type,threshold,
+    thresholdLabel:t.placeholder!==null?t.label:null
+  });
+  saveAch();
+  document.getElementById('achEditBox')?.remove();
+  renderAchGallery();
+  showToast('成就已创建 🎖️');
+}
+
+function checkAchievements(){
+  if(viewingDate)return; // only check for today
+  const done=state.filter(Boolean).length;
+  const lines=getLines().length;
+  const h=new Date().getHours();
+
+  // Pre-compute cumulative total
+  let cumTotal=0;
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(!k||!k.startsWith(userPrefix()))continue;
+    const d=k.replace(userPrefix(),'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
+    try{const s=JSON.parse(localStorage.getItem(k));cumTotal+=(s.done||0);}catch(e){}
+  }
+
+  // Pre-compute streak
+  let streak=0;const sd=new Date();
+  for(let i=0;i<120;i++){
+    const ds=sd.toISOString().slice(0,10);
+    const s=ls.get(userPrefix()+ds);
+    if(s){try{const p=JSON.parse(s);if((p.lines||0)>=1){streak++;sd.setDate(sd.getDate()-1);continue;}}catch(e){}}
+    break;
+  }
+
+  // Full board check
+  const nonEmpty=Array.from({length:totalCells()},(_,i)=>i).filter(i=>getTaskName(i));
+  const isFull=nonEmpty.length>0&&nonEmpty.every(i=>state[i]);
+  // Mandatory check
+  let hasMandatoryDone=false;
+  for(let p=0;p<totalCells();p++){if(state[p]&&mandatory.has(order[p])){hasMandatoryDone=true;break;}}
+
+  // Check each achievement using its (possibly customised) threshold
+  allAchievements().forEach(base=>{
+    const a=getAch(base.id);
+    const t=a.threshold;
+    let met=false;
+    switch(a.type){
+      case 'tasks_today': met=done>=t; break;
+      case 'lines_today': met=lines>=t; break;
+      case 'full_board':  met=isFull; break;
+      case 'streak':      met=streak>=t; break;
+      case 'tasks_total': met=cumTotal>=t; break;
+      case 'hour_before': met=done>=1&&h<t; break;
+      case 'hour_after':  met=done>=1&&(h>=t||t===0); break;
+      case 'mandatory':   met=hasMandatoryDone; break;
+    }
+    if(met)unlockAch(base.id);
+  });
+}
+
 // ── Toasts ────────────────────────────────────────────────────────────────────
 let tT=null,lT=null;
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2200);}
 function showLockedToast(m){const t=document.getElementById('lockedToast');t.textContent=m;t.classList.add('show');clearTimeout(lT);lT=setTimeout(()=>t.classList.remove('show'),2000);}
+
+// Custom confirm (replaces confirm() which is blocked in iOS PWA)
+function showConfirm(msg,onOk){
+  let box=document.getElementById('customConfirm');
+  if(!box){
+    box=document.createElement('div');box.id='customConfirm';
+    box.style.cssText='position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:20px;';
+    box.innerHTML=`<div style="background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+      <div id="confirmMsg" style="font-size:.95rem;font-weight:800;color:#2d3142;text-align:center;margin-bottom:20px;line-height:1.5;"></div>
+      <div style="display:flex;gap:10px;">
+        <button id="confirmCancel" style="flex:1;padding:12px;border-radius:12px;border:none;background:#f2f4f8;font-size:.88rem;font-weight:800;cursor:pointer;color:#6b7280;">取消</button>
+        <button id="confirmOk" style="flex:1;padding:12px;border-radius:12px;border:none;background:#f4967e;font-size:.88rem;font-weight:800;cursor:pointer;color:#fff;">确定</button>
+      </div>
+    </div>`;
+    document.body.appendChild(box);
+  }
+  document.getElementById('confirmMsg').textContent=msg;
+  box.style.display='flex';
+  const close=()=>{box.style.display='none';};
+  document.getElementById('confirmOk').onclick=()=>{close();onOk();};
+  document.getElementById('confirmCancel').onclick=close;
+  box.onclick=e=>{if(e.target===box)close();};
+}
+
+// ── BINGO Modal ───────────────────────────────────────────────────────────────
+let bingoModalTimer=null;
+function showBingoModal(lines,cheer){
+  const emojis=['🎯','🏆','⚡','🔥','👑','🌟','💥','🎊'];
+  document.getElementById('bingoModalEmoji').textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  document.getElementById('bingoModalLines').textContent=`🎯 连成 ${lines} 条线！`;
+  document.getElementById('bingoModalCheer').textContent=cheer;
+  const ov=document.getElementById('bingoModalOverlay');
+  ov.classList.add('show');
+  clearTimeout(bingoModalTimer);
+  bingoModalTimer=setTimeout(()=>closeBingoModal(),2000);
+}
+function closeBingoModal(){
+  document.getElementById('bingoModalOverlay').classList.remove('show');
+  clearTimeout(bingoModalTimer);
+}
 
 // ── Confetti ──────────────────────────────────────────────────────────────────
 function doConfetti(){
@@ -924,12 +1899,171 @@ function doConfetti(){
   let f=0;(function draw(){c.clearRect(0,0,cv.width,cv.height);let alive=false;ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.vrot;p.vy+=.08;if(f>55)p.alpha=Math.max(0,p.alpha-.014);if(p.y<cv.height+20&&p.alpha>0)alive=true;c.save();c.globalAlpha=p.alpha;c.translate(p.x,p.y);c.rotate(p.rot*Math.PI/180);c.fillStyle=p.color;c.fillRect(-p.w/2,-p.h/2,p.w,p.h);c.restore();});f++;if(alive&&f<200)requestAnimationFrame(draw);else c.clearRect(0,0,cv.width,cv.height);})();
 }
 
+// ── Login / User ──────────────────────────────────────────────────────────────
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
+
+function switchLoginTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabReg').classList.toggle('active',tab==='reg');
+  document.getElementById('loginPassConfirmField').style.display=tab==='reg'?'block':'none';
+  document.getElementById('loginSubmitBtn').textContent=tab==='reg'?'注册':'登录';
+  document.getElementById('loginSubmitBtn').onclick=tab==='reg'?doRegister:doLogin;
+}
+
+function doLogin(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!user||!pass){showLoginError('请填写用户名和密码');return;}
+  const stored=ls.get(KP+'account_'+user);
+  if(!stored){showLoginError('用户不存在，请先注册');return;}
+  const acc=JSON.parse(stored);
+  if(acc.hash!==simpleHash(pass)){showLoginError('密码错误');return;}
+  currentUser={username:user};
+  ls.set(K.user,JSON.stringify(currentUser));
+  closeLoginModal();
+  loadAll();load();buildGrid();render();
+  updateUserBadge();
+  showToast(`欢迎回来，${user} 👋`);
+}
+
+function doRegister(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const pass2=document.getElementById('loginPassConfirm').value;
+  if(!user||!pass){showLoginError('请填写用户名和密码');return;}
+  if(pass!==pass2){showLoginError('两次密码不一致');return;}
+  if(ls.get(KP+'account_'+user)){showLoginError('用户名已被占用');return;}
+  ls.set(KP+'account_'+user,JSON.stringify({hash:simpleHash(pass)}));
+  currentUser={username:user};
+  ls.set(K.user,JSON.stringify(currentUser));
+  closeLoginModal();
+  updateUserBadge();
+  showToast(`注册成功，欢迎 ${user}！🎉`);
+}
+
+function showLoginError(msg){
+  let err=document.getElementById('loginErr');
+  if(!err){err=document.createElement('div');err.id='loginErr';err.style.cssText='color:#c05040;font-size:.75rem;font-weight:700;text-align:center;margin-top:8px;';document.querySelector('.login-btn').after(err);}
+  err.textContent=msg;
+}
+
+function skipLogin(){
+  currentUser=null;ls.set(K.user,'');
+  closeLoginModal();
+  updateUserBadge();
+}
+
+function openLoginModal(){
+  if(currentUser){
+    // Show logout option
+    if(confirm(`当前用户：${currentUser.username}\n确定要退出登录吗？`)){
+      currentUser=null;ls.set(K.user,'');
+      updateUserBadge();
+      showToast('已退出登录');
+    }
+    return;
+  }
+  document.getElementById('loginOverlay').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+function closeLoginModal(){document.getElementById('loginOverlay').style.display='none';}
+
+function updateUserBadge(){
+  const btn=document.getElementById('userBadgeBtn');
+  if(!btn)return;
+  if(currentUser){
+    btn.style.display='flex';
+    btn.innerHTML=`<div class="login-user-badge"><div class="login-avatar">${currentUser.username[0].toUpperCase()}</div><span class="login-username">${escHtml(currentUser.username)}</span></div>`;
+  } else {
+    btn.style.display='flex';
+    btn.innerHTML=`<button class="btn-icon" title="登录" style="font-size:.7rem;font-weight:800;color:var(--purple);">登录</button>`;
+  }
+}
+
+// ── Data Export / Import (for PWA ↔ Browser migration) ────────────────────────
+function exportAllData(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith(KP))data[k]=localStorage.getItem(k);
+  }
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+
+function openExportModal(importMode){
+  const ov=document.getElementById('exportModalOverlay');
+  const ta=document.getElementById('exportTextarea');
+  const title=document.getElementById('exportModalTitle');
+  const desc=document.getElementById('exportModalDesc');
+  if(importMode){
+    title.textContent='📥 从浏览器导入数据';
+    desc.textContent='请在浏览器（Safari）中打开本网址，点击底部📦按钮复制导出码，然后回到这里粘贴并点击「导入数据」。';
+    ta.value='';ta.placeholder='粘贴从浏览器复制的导出码…';
+  } else {
+    title.textContent='📦 数据导出 / 迁移';
+    desc.textContent='复制导出码后在其他设备/浏览器中打开本网址，点击📦，粘贴并导入。主屏幕App与浏览器之间也可用此方式同步数据。';
+    ta.value=exportAllData();
+    ta.placeholder='';
+  }
+  ov.classList.add('show');
+}
+
+function closeExportModal(){document.getElementById('exportModalOverlay').classList.remove('show');}
+
+function exportCopy(){
+  const ta=document.getElementById('exportTextarea');
+  if(!ta.value)ta.value=exportAllData();
+  try{navigator.clipboard.writeText(ta.value).then(()=>showToast('已复制到剪贴板 ✓'));}
+  catch(e){ta.select();document.execCommand('copy');showToast('已复制 ✓');}
+}
+
+function importData(){
+  const ta=document.getElementById('exportTextarea');
+  const raw=ta.value.trim();
+  if(!raw){showToast('请先粘贴导出码');return;}
+  try{
+    const data=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    let count=0;
+    for(const [k,v] of Object.entries(data)){
+      if(k.startsWith(KP)){ls.set(k,v);count++;}
+    }
+    closeExportModal();
+    loadAll();load();buildGrid();render();
+    showToast(`已导入 ${count} 条数据 ✓`);
+  }catch(e){showToast('导出码无效，请重新复制');}
+}
+
+// ── PWA detection ──────────────────────────────────────────────────────────────
+function isPWA(){
+  return window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+}
+function checkPWAFirstRun(){
+  if(!isPWA())return;
+  const key=KP+'pwa_welcomed';
+  if(ls.get(key))return;
+  ls.set(key,'1');
+  // Show banner after a short delay
+  const banner=document.getElementById('pwaBanner');
+  if(banner){banner.style.display='block';setTimeout(()=>{banner.style.display='none';},8000);}
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 const now=new Date(),WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 document.getElementById('dateDisplay').textContent=`${now.getFullYear()} · ${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} · ${WD[now.getDay()]}`;
 loadAll();load();loadTheme();buildGrid();render();
+updateSizeBtns();
 // Purge any stale timestamps left over from old bugs
 save();
+checkPWAFirstRun();
+// Show login modal if first time (no user set)
+if(!ls.get(K.user)){
+  setTimeout(()=>document.getElementById('loginOverlay').style.display='flex',800);
+} else {
+  updateUserBadge();
+}
+
 </script>
 </body>
 </html>
