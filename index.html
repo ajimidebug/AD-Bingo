@@ -1237,15 +1237,7 @@ function _installPanelTouchHandler(){
         const gi=_drag.gi,ti=_drag.ti;
         if(gi>=0&&ti>=0&&groups[gi]&&groups[gi].tasks[ti]){
           vibrate(40);
-          const name=groups[gi].tasks[ti].name;
-          showConfirm(`删除「${name}」？`,()=>{
-            if(groups[gi]&&groups[gi].tasks[ti]&&groups[gi].tasks[ti].name===name){
-              groups[gi].tasks.splice(ti,1);
-              ls.set(getUserKey('groups'),JSON.stringify(groups));
-              renderTaskPanel();
-              showToast(`已删除「${name}」🗑️`);
-            }
-          });
+          showBubbleMenu(gi,ti);
         }
       }
     },500);
@@ -1382,10 +1374,9 @@ function makeBubbleEl(gi,ti,task,gc){
     }
   }
   b.dataset.gi=String(gi);b.dataset.ti=String(ti);
-  // Build inner HTML: name + optional schedule dot + sched-btn + del
+  // Only name + optional schedule dot (no buttons — actions via long-press menu)
   let schedDot=hasSchedule?`<span class="bubble-sched-dot" title="有计划设置"></span>`:'';
-  let schedBtn=`<button class="bubble-sched-btn" title="设置计划" onclick="event.stopPropagation();openSchedSheet(${gi},${ti})">📅</button>`;
-  b.innerHTML=`<span>${escHtml(task.name)}</span>${schedDot}${schedBtn}<button class="bubble-del" onclick="event.stopPropagation();bubbleDelete(${gi},${ti})">✕</button>`;
+  b.innerHTML=`<span>${escHtml(task.name)}</span>${schedDot}`;
   b.addEventListener('click',e=>{
     if(e.sourceCapabilities&&!e.sourceCapabilities.firesTouchEvents){
       toggleTaskActive(gi,ti);
@@ -2209,6 +2200,40 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 function showLockedToast(m){const t=document.getElementById('lockedToast');t.textContent=m;t.classList.add('show');clearTimeout(lT);lT=setTimeout(()=>t.classList.remove('show'),2000);}
 
 // Custom confirm (replaces confirm() which is blocked in iOS PWA)
+function showBubbleMenu(gi,ti){
+  const task=groups[gi].tasks[ti];
+  const name=task.name;
+  const hasSchedule=taskHasSchedule(task);
+  let menu=document.getElementById('bubbleMenu');
+  if(menu)menu.remove();
+  menu=document.createElement('div');
+  menu.id='bubbleMenu';
+  menu.style.cssText='position:fixed;inset:0;z-index:2000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.35);';
+  menu.innerHTML=`
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));">
+      <div style="font-size:.85rem;font-weight:900;color:var(--text-mid);text-align:center;padding:4px 0 14px;border-bottom:1px solid var(--bg);margin-bottom:8px;">${escHtml(name)}${hasSchedule?' 📅':''}</div>
+      <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 设置出现时间</button>
+      <button id="bmDel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--coral-lt);color:#c05040;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">🗑️ 删除任务</button>
+      <button id="bmCancel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;text-align:center;">取消</button>
+    </div>`;
+  document.body.appendChild(menu);
+  const close=()=>menu.remove();
+  menu.addEventListener('click',e=>{if(e.target===menu)close();});
+  document.getElementById('bmCancel').onclick=close;
+  document.getElementById('bmSched').onclick=()=>{close();openSchedSheet(gi,ti);};
+  document.getElementById('bmDel').onclick=()=>{
+    close();
+    showConfirm(`删除「${name}」？`,()=>{
+      if(groups[gi]&&groups[gi].tasks[ti]&&groups[gi].tasks[ti].name===name){
+        groups[gi].tasks.splice(ti,1);
+        ls.set(getUserKey('groups'),JSON.stringify(groups));
+        renderTaskPanel();
+        showToast(`已删除「${name}」🗑️`);
+      }
+    });
+  };
+}
+
 function showConfirm(msg,onOk){
   let box=document.getElementById('customConfirm');
   if(!box){
