@@ -809,6 +809,7 @@ function load(){
       if(Array.isArray(d.state))state=d.state;
       if(Array.isArray(d.order))order=d.order;
       if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){gridSize=d.gridSize;updateSizeBtns();}
+      if(d.activeSnapshot) restoreActiveSnapshot(d.activeSnapshot);
     }
   }catch(e){}
   if(state.length!==totalCells()){state=Array(totalCells()).fill(false);}
@@ -819,7 +820,10 @@ function load(){
 function save(){
   try{
     const done=state.filter(Boolean).length,lines=getLines().length,pct=Math.round(calcPct(done,lines));
-    ls.set(activeKey(),JSON.stringify({state,order,done,lines,pct,gridSize}));
+    // Snapshot which task names are active (manual selection, not schedule-derived)
+    const activeSnapshot=[];
+    for(const g of groups) for(const t of g.tasks) if(t.active) activeSnapshot.push(t.name);
+    ls.set(activeKey(),JSON.stringify({state,order,done,lines,pct,gridSize,activeSnapshot}));
     // Keep timestamps in sync: only entries for currently-checked tasks
     const d=activeDate();
     if(timestamps[d]){
@@ -829,6 +833,15 @@ function save(){
       ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
     }
   }catch(e){}
+}
+
+// Restore groups' active flags from a saved snapshot array of task names
+function restoreActiveSnapshot(activeSnapshot){
+  if(!Array.isArray(activeSnapshot))return;
+  const snapSet=new Set(activeSnapshot);
+  for(const g of groups) for(const t of g.tasks){
+    if(!taskHasSchedule(t)) t.active=snapSet.has(t.name);
+  }
 }
 function loadAll(){
   runMigration();
@@ -957,22 +970,22 @@ function hasNoteOrTodo(taskName){const d=getDetail(taskName);return d.notes.trim
 
 // ── Viewing date ──────────────────────────────────────────────────────────────
 function setViewingDate(ds){
+  // Save current date's state before switching away
+  if(!viewingDate) save();
   viewingDate=(ds===todayStr())?null:ds;
   if(!viewingDate){
-    // restoring today: re-load today's data with current gridSize
+    // restoring today: re-load today's data
     load();
   } else {
-    // load that day — restore gridSize saved with that day's data
+    // load that day — restore gridSize + activeSnapshot saved with that day's data
     try{
       const s=ls.get(activeKey()); // activeKey() now uses viewingDate
       if(s){
         const d=JSON.parse(s);
-        if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){
-          gridSize=d.gridSize;
-          updateSizeBtns();
-        }
+        if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){gridSize=d.gridSize;updateSizeBtns();}
         if(Array.isArray(d.state))state=d.state;
         if(Array.isArray(d.order))order=d.order;
+        if(d.activeSnapshot) restoreActiveSnapshot(d.activeSnapshot);
       } else {
         state=Array(totalCells()).fill(false);
         order=[...Array(totalCells()).keys()];
