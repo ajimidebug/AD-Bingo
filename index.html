@@ -123,32 +123,28 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .task-count-hint{font-size:.7rem;color:var(--text-lt);font-weight:600;text-align:center;padding:4px 0 8px;}
 
 /* Group */
-.group-header{display:flex;align-items:center;gap:8px;margin:12px 0 6px;padding:0 2px;}
+.group-header{display:flex;align-items:center;gap:8px;margin:14px 0 7px;padding:0 2px;}
 .group-name-input{flex:1;font-size:.8rem;font-weight:800;color:var(--text-mid);background:transparent;border:none;outline:none;font-family:"Nunito","Noto Sans SC",sans-serif;-webkit-appearance:none;}
 .group-name-input:focus{background:var(--purple-lt);border-radius:6px;padding:1px 4px;}
 .group-del-btn{width:22px;height:22px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--text-lt);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
 .group-del-btn:hover{background:var(--coral-lt);color:var(--coral);}
-.add-group-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg);border-radius:10px;border:none;cursor:pointer;font-size:.78rem;font-weight:700;color:var(--text-mid);width:100%;margin-top:8px;}
+.add-group-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg);border-radius:10px;border:none;cursor:pointer;font-size:.78rem;font-weight:700;color:var(--text-mid);width:100%;margin-top:10px;}
 .add-group-btn:hover{background:var(--purple-lt);color:#7b5ea7;}
 
-/* Task item (drag) */
-.task-item{display:flex;align-items:center;gap:8px;padding:9px 10px;margin-bottom:5px;background:var(--bg);border-radius:11px;border:2px solid transparent;transition:border-color .2s,box-shadow .2s;cursor:grab;}
-.task-item.active-task{border-color:var(--done);}
-.task-item.dragging{opacity:.5;box-shadow:0 8px 24px rgba(0,0,0,.15);cursor:grabbing;}
-.task-item.drag-over{border-color:var(--purple);background:var(--purple-lt);}
-.task-drag-handle{color:var(--text-lt);font-size:.9rem;cursor:grab;flex-shrink:0;padding:0 2px;}
-.task-item-check{width:20px;height:20px;border-radius:5px;flex-shrink:0;border:2px solid var(--text-lt);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent;transition:all .2s;}
-.task-item.active-task .task-item-check{background:var(--done);border-color:var(--done-dk);color:#fff;}
-.task-item.active-task .task-item-check::after{content:'✓';}
-.task-item-name{flex:1;font-size:.85rem;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;-webkit-appearance:none;min-width:0;}
-.task-item-name:focus{background:var(--purple-lt);border-radius:5px;padding:1px 4px;}
-.task-item-del{width:22px;height:22px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--text-lt);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
-.task-item-del:hover{background:var(--coral-lt);color:var(--coral);}
-.task-add-row{display:flex;gap:6px;margin-top:6px;}
-.task-add-input{flex:1;padding:9px 11px;background:var(--bg);border:2px solid transparent;border-radius:10px;outline:none;font-family:"Noto Sans SC",sans-serif;font-size:.85rem;color:var(--text);transition:border-color .2s;-webkit-appearance:none;}
+/* Task bubbles */
+.task-bubble-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
+.task-bubble{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:.82rem;font-weight:700;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text-mid);border:2px solid transparent;cursor:pointer;user-select:none;transition:all .18s;position:relative;}
+.task-bubble:hover{background:var(--done-lt);}
+.task-bubble.active-bubble{background:var(--done);color:#fff;border-color:var(--done-dk);}
+.task-bubble.dragging-bubble{opacity:.45;transform:scale(.92);}
+.task-bubble.drag-over-bubble{border-color:var(--purple);background:var(--purple-lt);}
+.bubble-del{width:16px;height:16px;border-radius:50%;border:none;background:rgba(0,0,0,.12);cursor:pointer;color:inherit;font-size:.6rem;display:flex;align-items:center;justify-content:center;opacity:.7;padding:0;line-height:1;flex-shrink:0;}
+.bubble-del:hover{opacity:1;background:rgba(0,0,0,.22);}
+.task-add-row{display:flex;gap:6px;margin-top:8px;}
+.task-add-input{flex:1;padding:8px 11px;background:var(--bg);border:2px solid transparent;border-radius:10px;outline:none;font-family:"Noto Sans SC",sans-serif;font-size:.85rem;color:var(--text);transition:border-color .2s;-webkit-appearance:none;}
 .task-add-input:focus{border-color:var(--done);}
 .task-add-input::placeholder{color:var(--text-lt);}
-.task-add-btn{width:38px;height:38px;border-radius:10px;border:none;background:var(--done);color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.task-add-btn{width:36px;height:36px;border-radius:10px;border:none;background:var(--done);color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
 /* Overlay/Sheet */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:200;opacity:0;pointer-events:none;transition:opacity .28s;}
@@ -401,8 +397,8 @@ const PALETTES=[
   {bg:'#fef6e4',color:'#c8882a'},{bg:'#f0ebfa',color:'#7b5ea7'},
   {bg:'#fde8ef',color:'#c0607a'},{bg:'#fdeee9',color:'#c06040'},
 ];
-const CHEERS=["做到啦！+1 ✨","很好，继续 💪","今天的你很努力 🌈","又划掉一项！😊","棒棒的！一步一步来 🐾","给自己一个掌声 👏","你比想象中更能干 🚀","小目标达成！开心一下 🥳","脑子今天很配合 🧠","耶！又前进了 ⚡","悄悄努力，然后惊艳所有人 🌟","今天也没有放弃，了不起 🙌"];
-const BINGO_CHEERS=["🎉🎉 BINGO！！你也太厉害了吧！！！","🔥 连线成功！！今天是神！！🔥","💥 爆！！！大赢家！💥","🌟🌟 BINGO！！！任务之王！！🌟🌟","✨ 你就是今天最耀眼的那颗星！！✨","🎊 BINGO成就达成！全场最佳！🎊","🏆 连线连线连线！！！无敌了你！！🏆"];
+const CHEERS=["搞定！","漂亮！","+1","拿下！","消灭它！","专注达成","大脑开机","你做到了","小胜一筹","状态在线","撒花 🌸","多巴胺+1","不愧是你","稳。","击碎拖延","执行功能+1","打卡成功"];
+const BINGO_CHEERS=["简直是执行力之神！⚡","多巴胺大爆发！！🔥","你是怎么做到的？！天才！","统治全场！👑","Bingo 大满贯！🎯","你的大脑今天开了挂！","史诗级的胜利！🏆","这种连线速度是真实的吗？！","这波操作我给满分！💯","你的意志力正在熊熊燃烧！🔥","连线成功！解锁「高效狂魔」称号！","爽！翻！了！🎉","彻底征服这道防线！💥"];
 const CIRC=157.08;
 const KP='adhd_bingo_';
 const K={
@@ -638,52 +634,44 @@ function renderTaskPanel(){
   const body=document.getElementById('taskPanelBody');
   body.innerHTML='';
   const active=getActiveTasks().length;
-  const hint=document.createElement('div');hint.className='task-count-hint';hint.textContent=`已选 ${active} 个（Bingo 使用前 ${totalCells()} 个）`;
+  const hint=document.createElement('div');hint.className='task-count-hint';hint.id='taskCountHint';
+  hint.textContent=`已选 ${active} 个（Bingo 使用前 ${totalCells()} 个）`;
   body.appendChild(hint);
   groups.forEach((grp,gi)=>{
-    // Group header
     const gh=document.createElement('div');gh.className='group-header';
-    gh.innerHTML=`<span style="color:var(--text-lt);font-size:.9rem">▸</span><input class="group-name-input" value="${escHtml(grp.name)}" maxlength="20" autocomplete="off" onchange="renameGroup(${gi},this.value)" onblur="renameGroup(${gi},this.value)"/>${groups.length>1?`<button class="group-del-btn" onclick="deleteGroup(${gi})">✕</button>`:''}`;
+    gh.innerHTML=`<span style="color:var(--text-lt);font-size:.85rem">▸</span><input class="group-name-input" value="${escHtml(grp.name)}" maxlength="20" autocomplete="off" onchange="renameGroup(${gi},this.value)" onblur="renameGroup(${gi},this.value)"/>${groups.length>1?`<button class="group-del-btn" onclick="deleteGroup(${gi})">✕</button>`:''}`;
     body.appendChild(gh);
-    // Tasks in group
-    const container=document.createElement('div');container.dataset.group=gi;
-    grp.tasks.forEach((task,ti)=>{
-      container.appendChild(makeTaskEl(gi,ti,task));
-    });
-    body.appendChild(container);
-    // Add task row
+    const wrap=document.createElement('div');wrap.className='task-bubble-wrap';wrap.dataset.group=gi;
+    grp.tasks.forEach((task,ti)=>wrap.appendChild(makeBubbleEl(gi,ti,task)));
+    body.appendChild(wrap);
     const addRow=document.createElement('div');addRow.className='task-add-row';
     addRow.innerHTML=`<input class="task-add-input" placeholder="添加任务…" maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')addTaskToGroup(${gi},this)"/><button class="task-add-btn" onclick="addTaskToGroup(${gi},this.previousElementSibling)">+</button>`;
     body.appendChild(addRow);
   });
-  // Add group button
   const agb=document.createElement('button');agb.className='add-group-btn';agb.onclick=addGroup;agb.innerHTML='＋ 新建分组';
   body.appendChild(agb);
 }
 
-function makeTaskEl(gi,ti,task){
-  const item=document.createElement('div');
-  item.className='task-item'+(task.active?' active-task':'');
-  item.draggable=true;item.dataset.gi=gi;item.dataset.ti=ti;
-  item.innerHTML=`<span class="task-drag-handle" title="拖动排序">⠿</span><div class="task-item-check" onclick="toggleTaskActive(${gi},${ti})"></div><input class="task-item-name" value="${escHtml(task.name)}" maxlength="10" autocomplete="off" onchange="renameTask(${gi},${ti},this.value)" onblur="renameTask(${gi},${ti},this.value)"/><button class="task-item-del" onclick="deleteTask(${gi},${ti})">✕</button>`;
-  // drag events
-  item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',`${gi},${ti}`);item.classList.add('dragging');});
-  item.addEventListener('dragend',()=>item.classList.remove('dragging'));
-  item.addEventListener('dragover',e=>{e.preventDefault();item.classList.add('drag-over');});
-  item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
-  item.addEventListener('drop',e=>{
-    e.preventDefault();item.classList.remove('drag-over');
+function makeBubbleEl(gi,ti,task){
+  const b=document.createElement('div');
+  b.className='task-bubble'+(task.active?' active-bubble':'');
+  b.draggable=true;b.dataset.gi=gi;b.dataset.ti=ti;
+  b.innerHTML=`<span>${escHtml(task.name)}</span><button class="bubble-del" onclick="event.stopPropagation();deleteTask(${gi},${ti})">✕</button>`;
+  b.addEventListener('click',()=>toggleTaskActive(gi,ti));
+  b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',`${gi},${ti}`);b.classList.add('dragging-bubble');});
+  b.addEventListener('dragend',()=>b.classList.remove('dragging-bubble'));
+  b.addEventListener('dragover',e=>{e.preventDefault();b.classList.add('drag-over-bubble');});
+  b.addEventListener('dragleave',()=>b.classList.remove('drag-over-bubble'));
+  b.addEventListener('drop',e=>{
+    e.preventDefault();b.classList.remove('drag-over-bubble');
     const [sgi,sti]=e.dataTransfer.getData('text/plain').split(',').map(Number);
-    const tgi=parseInt(item.dataset.gi),tti=parseInt(item.dataset.ti);
+    const tgi=parseInt(b.dataset.gi),tti=parseInt(b.dataset.ti);
     if(sgi===tgi&&sti===tti)return;
     const moved=groups[sgi].tasks.splice(sti,1)[0];
     groups[tgi].tasks.splice(tti,0,moved);
     ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();
   });
-  // touch drag (simple swap on touch)
-  let touchSrc=null;
-  item.addEventListener('touchstart',e=>{touchSrc={gi,ti};},{passive:true});
-  return item;
+  return b;
 }
 
 function toggleTaskActive(gi,ti){groups[gi].tasks[ti].active=!groups[gi].tasks[ti].active;ls.set(K.groups,JSON.stringify(groups));renderTaskPanel();}
