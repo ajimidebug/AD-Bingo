@@ -144,7 +144,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 
 /* Task bubbles */
 .task-bubble-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
-.task-bubble{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:.82rem;font-weight:700;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text-mid);border:2px solid transparent;cursor:grab;user-select:none;transition:all .18s;position:relative;}
+.task-bubble{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:.82rem;font-weight:700;font-family:"PingFang SC","苹方","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text-mid);border:2px solid transparent;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:all .18s;position:relative;}
 .task-bubble:hover{background:var(--done-lt);}
 .task-bubble.active-bubble{background:var(--done);color:#fff;border-color:var(--done-dk);}
 .task-bubble.dragging-bubble{opacity:.45;transform:scale(.92);cursor:grabbing;}
@@ -480,7 +480,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 <div class="task-panel-overlay" id="taskOverlay" onclick="closeTaskPanel()"></div>
 <div class="task-panel" id="taskPanel">
   <div class="task-panel-header">
-    <div><div class="task-panel-title">📋 任务列表</div><div class="task-panel-sub">点击选择 · 拖动排序 · 双击更多操作</div></div>
+    <div><div class="task-panel-title">📋 任务列表</div><div class="task-panel-sub">点击选择 · 拖动排序/移组 · 双击更多</div></div>
     <button class="task-panel-close" onclick="closeTaskPanel()">✕</button>
   </div>
   <div class="task-panel-actions">
@@ -802,9 +802,11 @@ function runMigration(){
   ls.set(K.ver,APP_VERSION);
 }
 function load(){
+  let hasSavedRecord=false;
   try{
     const s=ls.get(activeKey());
     if(s){
+      hasSavedRecord=true;
       const d=JSON.parse(s);
       if(Array.isArray(d.state))state=d.state;
       if(Array.isArray(d.order))order=d.order;
@@ -814,8 +816,9 @@ function load(){
   }catch(e){}
   if(state.length!==totalCells()){state=Array(totalCells()).fill(false);}
   if(order.length!==totalCells()){order=[...Array(totalCells()).keys()];}
-  // Check if scheduled tasks overflow grid (only for today)
-  if(!viewingDate) setTimeout(()=>checkScheduleOverflow(todayStr()),200);
+  // Only check schedule overflow for today, and only if there's no saved record
+  // (if a record exists, the user already chose a grid size — respect it)
+  if(!viewingDate&&!hasSavedRecord) setTimeout(()=>checkScheduleOverflow(todayStr()),200);
 }
 function save(){
   try{
@@ -1407,8 +1410,10 @@ function _installPanelTouchHandler(){
       const gi=_drag.gi,ti=_drag.ti;
       _dragCleanup();
       const src=pb.querySelector(`.task-bubble[data-gi="${gi}"][data-ti="${ti}"]`);
-      if(src)src.style.opacity='';
+      // Hide src before elementFromPoint so it doesn't block the target
+      if(src)src.style.visibility='hidden';
       const hit=document.elementFromPoint(touch.clientX,touch.clientY);
+      if(src)src.style.visibility='';
       if(hit&&gi>=0&&ti>=0&&groups[gi]&&groups[gi].tasks[ti]){
         const trash=hit.closest('.task-trash-zone');
         const tb=hit.closest('.task-bubble');
@@ -1510,7 +1515,24 @@ function makeBubbleEl(gi,ti,task,gc){
 
 function toggleTaskActive(gi,ti){
   const t=groups[gi].tasks[ti];
-  t.active=!t.active;ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();
+  t.active=!t.active;
+  ls.set(getUserKey('groups'),JSON.stringify(groups));
+  // Rebuild order/state to match new active task count
+  const activeTasks=getActiveTasks();
+  const n=totalCells();
+  // Keep existing done-by-name mapping
+  const doneNames=new Set();
+  for(let pos=0;pos<state.length;pos++){if(state[pos]){const nm=getTaskName(pos);if(nm)doneNames.add(nm);}}
+  // Rebuild order: keep existing slots, add/remove as needed
+  const usedIdxs=new Set(order.filter(i=>i<activeTasks.length));
+  const newIdxs=[...Array(activeTasks.length).keys()].filter(i=>!usedIdxs.has(i));
+  let newOrder=order.filter(i=>i<activeTasks.length);
+  newOrder=[...newOrder,...newIdxs];
+  if(newOrder.length<n)while(newOrder.length<n)newOrder.push(newOrder.length);
+  order=newOrder.slice(0,n);
+  state=Array(n).fill(false);
+  for(let pos=0;pos<n;pos++){const idx=order[pos];if(idx<activeTasks.length&&doneNames.has(activeTasks[idx]))state[pos]=true;}
+  save();renderTaskPanel();buildGrid();render();
 }
 function bubbleDelete(gi,ti){
   if(!groups[gi]||!groups[gi].tasks[ti])return;
@@ -2307,6 +2329,7 @@ function showBubbleMenu(gi,ti){
   menu.innerHTML=`
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));">
       <div style="font-size:.85rem;font-weight:900;color:var(--text-mid);text-align:center;padding:4px 0 14px;border-bottom:1px solid var(--bg);margin-bottom:8px;">${escHtml(name)}${hasSchedule?' 📅':''}</div>
+      <button id="bmRename" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--purple-lt);color:var(--purple);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">✏️ 修改名称</button>
       <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 设置出现时间</button>
       <button id="bmDel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--coral-lt);color:#c05040;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">🗑️ 删除任务</button>
       <button id="bmCancel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;text-align:center;">取消</button>
@@ -2315,6 +2338,7 @@ function showBubbleMenu(gi,ti){
   const close=()=>menu.remove();
   menu.addEventListener('click',e=>{if(e.target===menu)close();});
   document.getElementById('bmCancel').onclick=close;
+  document.getElementById('bmRename').onclick=()=>{close();showRenameDialog(gi,ti);};
   document.getElementById('bmSched').onclick=()=>{close();openSchedSheet(gi,ti);};
   document.getElementById('bmDel').onclick=()=>{
     close();
@@ -2327,6 +2351,42 @@ function showBubbleMenu(gi,ti){
       }
     });
   };
+}
+
+function showRenameDialog(gi,ti){
+  const task=groups[gi].tasks[ti];
+  const oldName=task.name;
+  let box=document.getElementById('renameDialog');
+  if(box)box.remove();
+  box=document.createElement('div');
+  box.id='renameDialog';
+  box.style.cssText='position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:20px;';
+  box.innerHTML=`<div style="background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="font-size:.95rem;font-weight:900;color:#2d3142;text-align:center;margin-bottom:16px;">修改任务名称</div>
+    <input id="renameInput" maxlength="10" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:2px solid var(--purple);font-size:.95rem;font-family:inherit;font-weight:700;outline:none;margin-bottom:14px;" value="${escHtml(oldName)}"/>
+    <div style="display:flex;gap:10px;">
+      <button id="renameCancelBtn" style="flex:1;padding:12px;border-radius:12px;border:none;background:#f2f4f8;font-size:.88rem;font-weight:800;cursor:pointer;color:#6b7280;font-family:inherit;">取消</button>
+      <button id="renameOkBtn" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--purple);font-size:.88rem;font-weight:800;cursor:pointer;color:#fff;font-family:inherit;">确定</button>
+    </div>
+  </div>`;
+  document.body.appendChild(box);
+  const input=document.getElementById('renameInput');
+  input.focus();input.select();
+  const close=()=>box.remove();
+  const confirm=()=>{
+    const newName=input.value.trim();
+    if(!newName){showToast('名称不能为空');return;}
+    if(newName===oldName){close();return;}
+    task.name=newName;
+    ls.set(getUserKey('groups'),JSON.stringify(groups));
+    renderTaskPanel();
+    showToast(`已改为「${newName}」✏️`);
+    close();
+  };
+  document.getElementById('renameCancelBtn').onclick=close;
+  document.getElementById('renameOkBtn').onclick=confirm;
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')confirm();if(e.key==='Escape')close();});
+  box.addEventListener('click',e=>{if(e.target===box)close();});
 }
 
 function showConfirm(msg,onOk){
