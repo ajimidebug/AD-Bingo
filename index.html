@@ -542,8 +542,11 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
     <div class="detail-name-row"><input class="detail-name-input" id="detailNameInput" type="text" maxlength="10" placeholder="格子名称" autocomplete="off"/><span class="detail-name-label">修改名称</span></div>
     <div class="detail-row">
       <div><div class="detail-row-label">标记为完成</div></div>
-      <label class="toggle-switch"><input type="checkbox" id="detailDoneToggle"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      <label class="toggle-switch"><input type="checkbox" id="detailDoneToggle" onchange="toggleDetailTimeRow()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
     </div>
+    <div class="detail-row" id="detailTimeRow" style="display:none;">
+      <div><div class="detail-row-label">⏰ 完成时间</div><div class="detail-row-sub">修改打卡时间记录</div></div>
+      <input type="time" id="detailTimeInput" style="border:2px solid var(--done);border-radius:10px;padding:6px 10px;font-size:.88rem;font-weight:800;color:var(--text);background:var(--done-lt);outline:none;font-family:inherit;-webkit-appearance:none;"/></div>
     <div class="detail-row">
       <div><div class="detail-row-label">🔒 强制完成</div><div class="detail-row-sub">未完成时其他格子将被锁住</div></div>
       <label class="toggle-switch mandatory-toggle"><input type="checkbox" id="detailMandatoryToggle"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
@@ -1769,7 +1772,17 @@ function openDetail(pos){
   document.getElementById('detailMandatoryToggle').checked=mandatory.has(idx);
   document.getElementById('detailNotes').value=d.notes||'';
   renderTodoList(d.todos||[]);
+  // Populate completion time row
+  const existingTS=(timestamps[activeDate()]||[]).find(e=>e.name===taskName);
+  const timeInput=document.getElementById('detailTimeInput');
+  timeInput.value=existingTS?existingTS.time:'';
+  if(!timeInput.value){const n=new Date();timeInput.value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+  document.getElementById('detailTimeRow').style.display=state[pos]?'flex':'none';
   document.getElementById('detailOverlay').classList.add('open');document.getElementById('detailSheet').classList.add('open');
+}
+function toggleDetailTimeRow(){
+  const done=document.getElementById('detailDoneToggle').checked;
+  document.getElementById('detailTimeRow').style.display=done?'flex':'none';
 }
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailSheet').classList.remove('open');detailPos=-1;}
 function renderTodoList(todos){
@@ -1796,6 +1809,17 @@ function saveDetail(){
   state[detailPos]=isDone;
   if(isDone&&!wasDone)recordTS(newName);
   if(!isDone&&wasDone)removeTS(newName);
+  // If done, apply any manual time edit
+  if(isDone){
+    const editedTime=document.getElementById('detailTimeInput').value;
+    if(editedTime){
+      const d=activeDate();if(!timestamps[d])timestamps[d]=[];
+      const idx2=timestamps[d].findIndex(e=>e.name===newName);
+      if(idx2>=0)timestamps[d][idx2].time=editedTime;
+      else timestamps[d].push({name:newName,time:editedTime});
+      ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
+    }
+  }
   const isMand=document.getElementById('detailMandatoryToggle').checked;
   if(isMand)mandatory.add(idx);else mandatory.delete(idx);
   ls.set(getUserKey('mandatory'),JSON.stringify([...mandatory]));
