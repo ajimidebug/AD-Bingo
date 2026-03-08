@@ -1275,6 +1275,9 @@ function _installPanelTouchHandler(){
   if(!pb||pb._touchInstalled)return;
   pb._touchInstalled=true;
 
+  // track double-tap on bubbles using timestamps
+  let _lastTapTime=0,_lastTapGi=-1,_lastTapTi=-1;
+
   // ── Mouse long-press (desktop) ──
   let _mouseLpTimer=null,_mouseMoved=false,_mouseGi=-1,_mouseTi=-1;
   pb.addEventListener('mousedown',ev=>{
@@ -1306,7 +1309,20 @@ function _installPanelTouchHandler(){
     const touch=ev.touches[0];
     const bel=touch.target.closest('.task-bubble');
     if(!bel)return;
-    _drag.gi=+bel.dataset.gi;_drag.ti=+bel.dataset.ti;
+    const gi=+bel.dataset.gi,ti=+bel.dataset.ti;
+
+    // ── Double-tap detection (independent of drag) ──
+    const now=Date.now();
+    if(now-_lastTapTime<350&&_lastTapGi===gi&&_lastTapTi===ti){
+      // Second tap within window → show menu immediately on touchstart
+      _lastTapTime=0;_lastTapGi=-1;_lastTapTi=-1;
+      clearTimeout(_drag.lpTimer);_drag.lpTimer=null;
+      vibrate(30);showBubbleMenu(gi,ti);
+      return;
+    }
+    _lastTapTime=now;_lastTapGi=gi;_lastTapTi=ti;
+
+    _drag.gi=gi;_drag.ti=ti;
     _drag.startX=touch.clientX;_drag.startY=touch.clientY;
     _drag.moved=false;_drag.active=false;_drag.lastTargetGi=-1;
     clearTimeout(_drag.lpTimer);
@@ -1315,8 +1331,8 @@ function _installPanelTouchHandler(){
       if(!_drag.moved&&!_drag.active){
         const gi=_drag.gi,ti=_drag.ti;
         if(gi>=0&&ti>=0&&groups[gi]&&groups[gi].tasks[ti]){
-          vibrate(40);
-          showBubbleMenu(gi,ti);
+          _lastTapTime=0;_lastTapGi=-1;_lastTapTi=-1;
+          vibrate(40);showBubbleMenu(gi,ti);
         }
       }
     },500);
@@ -1384,9 +1400,6 @@ function _installPanelTouchHandler(){
     }
   },{passive:false});
 
-  // track double-tap on bubbles
-  let _tapTimer=null,_tapGi=-1,_tapTi=-1;
-
   pb.addEventListener('touchend',ev=>{
     clearTimeout(_drag.lpTimer);_drag.lpTimer=null;
     if(_drag.active){
@@ -1431,19 +1444,7 @@ function _installPanelTouchHandler(){
       }
     } else if(!_drag.moved&&_drag.gi>=0&&_drag.ti>=0){
       const gi=_drag.gi,ti=_drag.ti;
-      if(groups[gi]&&groups[gi].tasks[ti]){
-        // Double-tap detection: open menu; single tap: toggle
-        if(_tapGi===gi&&_tapTi===ti&&_tapTimer){
-          clearTimeout(_tapTimer);_tapTimer=null;_tapGi=-1;_tapTi=-1;
-          vibrate(30);showBubbleMenu(gi,ti);
-        } else {
-          clearTimeout(_tapTimer);_tapGi=gi;_tapTi=ti;
-          _tapTimer=setTimeout(()=>{
-            _tapTimer=null;_tapGi=-1;_tapTi=-1;
-            toggleTaskActive(gi,ti);
-          },280);
-        }
-      }
+      if(groups[gi]&&groups[gi].tasks[ti]) toggleTaskActive(gi,ti);
     }
     _drag.gi=-1;_drag.ti=-1;_drag.moved=false;
   },{passive:true});
