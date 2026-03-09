@@ -261,7 +261,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .history-timestamps{margin-top:8px;border-top:1px solid rgba(0,0,0,.06);padding-top:6px;display:none;}
 .history-timestamps.open{display:block;}
 .history-ts-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:.72rem;color:var(--text-mid);font-weight:600;}
-.history-ts-time{color:var(--text-lt);font-size:.68rem;min-width:38px;flex-shrink:0;line-height:1.4;}
+.history-ts-time{color:var(--text-lt);font-size:.68rem;min-width:38px;}
 
 /* Calendar */
 #calSheet{z-index:202;}#calOverlay{z-index:201;}
@@ -544,13 +544,6 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
     <div class="detail-row">
       <div><div class="detail-row-label">标记为完成</div></div>
       <label class="toggle-switch"><input type="checkbox" id="detailDoneToggle" onchange="toggleDetailTimeRow()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-    </div>
-    <div class="detail-row" id="detailStartRow">
-      <div><div class="detail-row-label">▶ 开始计时</div><div class="detail-row-sub" id="detailStartSub">记录本次任务的开始时间</div></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <input type="time" id="detailStartInput" style="border:2px solid var(--amber);border-radius:10px;padding:6px 10px;font-size:.88rem;font-weight:800;color:var(--text);background:var(--amber-lt);outline:none;font-family:inherit;-webkit-appearance:none;display:none;"/>
-        <button id="detailStartBtn" onclick="startTaskTimer()" style="padding:7px 13px;border-radius:10px;border:none;background:var(--amber);color:#fff;font-family:inherit;font-size:.78rem;font-weight:800;cursor:pointer;">开始</button>
-      </div>
     </div>
     <div class="detail-row" id="detailTimeRow" style="display:none;">
       <div><div class="detail-row-label">⏰ 完成时间</div><div class="detail-row-sub">修改打卡时间记录</div></div>
@@ -896,24 +889,12 @@ function saveUserData(){
   ls.set(getUserKey('details'),JSON.stringify(details));
   ls.set(getUserKey('mandatory'),JSON.stringify([...mandatory]));
 }
-
-// ── Duration helper ────────────────────────────────────────────────────────────
-function calcDuration(startTime, endTime) {
-  if (!startTime || !endTime) return null;
-  const [sh, sm] = startTime.split(':').map(Number);
-  const [eh, em] = endTime.split(':').map(Number);
-  const diff = (eh * 60 + em) - (sh * 60 + sm);
-  if (diff <= 0) return null;
-  if (diff < 60) return diff + '分钟';
-  return Math.floor(diff / 60) + '小时' + (diff % 60 ? (diff % 60) + '分' : '');
-}
-function recordTS(name,startTime){
+function recordTS(name){
   const d=activeDate();if(!timestamps[d])timestamps[d]=[];
   const n=new Date(),t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
   const idx=timestamps[d].findIndex(e=>e.name===name);
-  const entry=idx>=0?timestamps[d][idx]:(timestamps[d].push({name,time:t}),timestamps[d][timestamps[d].length-1]);
-  if(idx>=0)entry.time=t;
-  if(startTime)entry.startTime=startTime;
+  if(idx>=0)timestamps[d][idx].time=t;
+  else timestamps[d].push({name,time:t});
   ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
 }
 function removeTS(name){
@@ -1798,33 +1779,11 @@ function openDetail(pos){
   timeInput.value=existingTS?existingTS.time:'';
   if(!timeInput.value){const n=new Date();timeInput.value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
   document.getElementById('detailTimeRow').style.display=state[pos]?'flex':'none';
-  // Populate start time row
-  const startInput=document.getElementById('detailStartInput');
-  const startBtn=document.getElementById('detailStartBtn');
-  const startSub=document.getElementById('detailStartSub');
-  if(existingTS&&existingTS.startTime){
-    startInput.value=existingTS.startTime;
-    startInput.style.display='';
-    startBtn.textContent='修改';
-    startSub.textContent='已记录开始时间';
-  } else {
-    startInput.value='';startInput.style.display='none';
-    startBtn.textContent='开始';startSub.textContent='记录本次任务的开始时间';
-  }
   document.getElementById('detailOverlay').classList.add('open');document.getElementById('detailSheet').classList.add('open');
 }
 function toggleDetailTimeRow(){
   const done=document.getElementById('detailDoneToggle').checked;
   document.getElementById('detailTimeRow').style.display=done?'flex':'none';
-}
-function startTaskTimer(){
-  const n=new Date();
-  const t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-  const startInput=document.getElementById('detailStartInput');
-  const startBtn=document.getElementById('detailStartBtn');
-  const startSub=document.getElementById('detailStartSub');
-  startInput.value=t;startInput.style.display='';
-  startBtn.textContent='修改';startSub.textContent='已记录开始时间';
 }
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailSheet').classList.remove('open');detailPos=-1;}
 function renderTodoList(todos){
@@ -1854,21 +1813,11 @@ function saveDetail(){
   // If done, apply any manual time edit
   if(isDone){
     const editedTime=document.getElementById('detailTimeInput').value;
-    const editedStart=document.getElementById('detailStartInput').value;
-    if(editedTime||editedStart){
+    if(editedTime){
       const d=activeDate();if(!timestamps[d])timestamps[d]=[];
       const idx2=timestamps[d].findIndex(e=>e.name===newName);
-      const entry=idx2>=0?timestamps[d][idx2]:(timestamps[d].push({name:newName,time:''}),timestamps[d][timestamps[d].length-1]);
-      if(editedTime)entry.time=editedTime;
-      if(editedStart)entry.startTime=editedStart;else delete entry.startTime;
-      ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
-    }
-  } else {
-    // Clear startTime if task is un-done
-    const d=activeDate();
-    if(timestamps[d]){
-      const idx2=timestamps[d].findIndex(e=>e.name===newName);
-      if(idx2>=0)delete timestamps[d][idx2].startTime;
+      if(idx2>=0)timestamps[d][idx2].time=editedTime;
+      else timestamps[d].push({name:newName,time:editedTime});
       ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
     }
   }
@@ -1973,7 +1922,7 @@ function openHistory(){
     const done=e.done??(e.state?e.state.filter(Boolean).length:0),lines=e.lines??0,pct=e.pct??Math.min(done*20,100);
     const ts=timestamps[e.dateStr]||[];
     const item=document.createElement('div');item.className='history-item';
-    item.innerHTML=`<div class="history-item-header"><div class="history-date-block" data-date="${e.dateStr}"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看时间记录 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>`<div class="history-ts-item"><span class="history-ts-time">${t.startTime?'<span style="opacity:.55;font-size:.7em;margin-right:2px">▶ '+t.startTime+' → ':''}${t.time}</span><span style="flex:1">${escHtml(t.name)}</span>${t.startTime&&t.time?'<span style="font-size:.68rem;color:var(--text-lt);font-weight:700;white-space:nowrap">'+( calcDuration(t.startTime,t.time)||'')+'</span>':''}</div>`).join('')}</div>`:''}`;
+    item.innerHTML=`<div class="history-item-header"><div class="history-date-block" data-date="${e.dateStr}"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看完成时间 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>`<div class="history-ts-item"><span class="history-ts-time">${t.time}</span><span>${escHtml(t.name)}</span></div>`).join('')}</div>`:''}`;
     // Long-press OR double-click on date block to jump to bingo
     const dateBlock=item.querySelector('.history-date-block');
     let lpTimer=null,tapCount=0,tapResetTimer=null;
@@ -2063,7 +2012,7 @@ function showCalPreview(ds,data){
   else{html+=`<div class="cal-detail-pct" style="color:var(--text-lt)">当天没有记录</div>`;}
   if(ts.length){
     html+=`<div class="cal-edit-label" style="margin-top:8px">完成时间</div>`;
-    ts.sort((a,b)=>a.time.localeCompare(b.time)).forEach(t=>{const dur=calcDuration(t.startTime,t.time);html+=`<div class="cal-ts-row"><span class="cal-ts-time">${t.startTime?'<span style="opacity:.55;font-size:.75em">▶ '+t.startTime+' → </span>':''}${t.time}</span><span style="flex:1">${escHtml(t.name)}</span>${dur?'<span style="font-size:.7rem;color:var(--text-lt);font-weight:700">'+dur+'</span>':''}</div>`;});
+    ts.sort((a,b)=>a.time.localeCompare(b.time)).forEach(t=>{html+=`<div class="cal-ts-row"><span class="cal-ts-time">${t.time}</span><span>${escHtml(t.name)}</span></div>`;});
   }
   html+=`<button class="cal-save-btn" onclick="calGoToDay('${ds}')">${isToday?'返回今天 ↩':'跳转到这天编辑 →'}</button>`;
   html+=`</div>`;
@@ -2477,7 +2426,7 @@ function showBubbleMenu(gi,ti){
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));">
       <div style="font-size:.85rem;font-weight:900;color:var(--text-mid);text-align:center;padding:4px 0 14px;border-bottom:1px solid var(--bg);margin-bottom:8px;">${escHtml(name)}${hasSchedule?' 📅':''}</div>
       <button id="bmRename" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--purple-lt);color:var(--purple);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">✏️ 修改名称</button>
-      <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 计划任务时间</button>
+      <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 设置出现时间</button>
       <button id="bmDel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--coral-lt);color:#c05040;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">🗑️ 删除任务</button>
       <button id="bmCancel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;text-align:center;">取消</button>
     </div>`;
@@ -2796,11 +2745,49 @@ function importData(){
   try{
     const data=JSON.parse(decodeURIComponent(escape(atob(raw))));
     let count=0;
-    for(const [k,v] of Object.entries(data)){
-      if(k.startsWith(KP)){ls.set(k,v);count++;}
+
+    // ── 检测导出数据里的用户名前缀 ──────────────────────────────────────────
+    let srcUserPrefix = null;
+    const kpEsc = KP.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    for (const k of Object.keys(data)) {
+      const m = k.match(new RegExp('^' + kpEsc + 'u_(.+?)_(?:groups|details|mandatory|timestamps|achievements)$'));
+      if (m) { srcUserPrefix = KP + 'u_' + m[1] + '_'; break; }
     }
+
+    // 当前环境的用户前缀
+    const dstUserPrefix = currentUser ? KP + 'u_' + currentUser.username + '_' : null;
+
+    // 用户相关的字段名（需要做前缀映射的）
+    const USER_FIELDS = /^(groups|details|mandatory|timestamps|achievements|\d{4}-\d{2}-\d{2})$/;
+
+    for (const [k, v] of Object.entries(data)) {
+      if (!k.startsWith(KP)) continue;
+      let targetKey = k;
+
+      if (srcUserPrefix && k.startsWith(srcUserPrefix)) {
+        const field = k.slice(srcUserPrefix.length);
+        if (dstUserPrefix) {
+          // 场景②③：来源有用户前缀，目标已登录 → 映射到当前用户（不论用户名是否相同）
+          targetKey = dstUserPrefix + field;
+        } else {
+          // 场景④：来源有用户前缀，目标未登录 → 剥掉前缀写入全局 key
+          targetKey = KP + field;
+        }
+      } else if (!srcUserPrefix && dstUserPrefix) {
+        // 场景⑤：来源无用户前缀，目标已登录 → 用户数据字段加上目标用户前缀
+        const field = k.slice(KP.length);
+        if (USER_FIELDS.test(field)) {
+          targetKey = dstUserPrefix + field;
+        }
+      }
+      // 场景①：来源无用户前缀，目标未登录 → 原样写入，无需处理
+
+      ls.set(targetKey, v);
+      count++;
+    }
+
     closeExportModal();
-    loadAll();load();buildGrid();render();
+    loadAll(); load(); buildGrid(); render();
     showToast(`已导入 ${count} 条数据 ✓`);
   }catch(e){showToast('导出码无效，请重新复制');}
 }
