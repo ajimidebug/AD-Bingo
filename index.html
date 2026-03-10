@@ -678,6 +678,7 @@ body.theme-night .timer-widget{background:var(--surface);}
     <div class="export-btns">
       <button class="export-btn export-btn-copy" id="exportCopyBtn" onclick="exportCopy()">复制迁移码</button>
       <button class="export-btn" style="background:var(--green);color:#fff;" onclick="exportUnifiedCopy()">📋 结构化导出</button>
+      <button class="export-btn" style="background:var(--text-lt);color:#fff;" onclick="document.getElementById('exportTextarea').value=''">清空</button>
       <button class="export-btn export-btn-import" onclick="importData()">导入数据</button>
       <button class="export-btn export-btn-close" onclick="closeExportModal()">关闭</button>
     </div>
@@ -2540,6 +2541,7 @@ function openHistory(){
     const dt=new Date(e.dateStr+'T12:00:00'),isToday=e.dateStr===todayStr();
     const done=e.done??(e.state?e.state.filter(Boolean).length:0),lines=e.lines??0,pct=e.pct??Math.min(done*20,100);
     const ts=timestamps[e.dateStr]||[];
+    if(pct===0&&done===0&&!ts.length)return;
     const item=document.createElement('div');item.className='history-item';
     item.innerHTML=`<div class="history-item-header"><div class="history-date-block" data-date="${e.dateStr}"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看完成时间 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>{
       const fmt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0')+'m':''):m+'m';
@@ -2574,8 +2576,7 @@ function openHistory(){
           const focusMins=Math.round(t.focusSecs/60);
           const pauseMins=totalMins-focusMins;
           let parts='专注 '+fmt(focusMins);
-          if(pauseMins>0)parts+=' · 暂停 '+fmt(pauseMins);
-          parts+=' · 共 '+fmt(totalMins);
+          if(pauseMins>0)parts+=' 暂停 '+fmt(pauseMins);
           extra='<span class="history-ts-dur">'+parts+'</span>';
         } else {
           extra='<span class="history-ts-dur">'+fmt(totalMins)+'</span>';
@@ -2583,7 +2584,7 @@ function openHistory(){
       } else if(t.startTime){
         timeStr='开始 '+t.startTime;
       }
-      return '<div class="history-ts-item"><span class="history-ts-time">'+timeStr+'</span><span>'+escHtml(t.name)+'</span>'+extra+'</div>';
+      return '<div class="history-ts-item" style="flex-wrap:nowrap;gap:6px;"><span class="history-ts-time" style="white-space:nowrap;">'+timeStr+'</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(t.name)+'</span>'+extra+'</div>';
     }).join('')}</div>`:''}`;
     // Long-press OR double-click on date block to jump to bingo
     const dateBlock=item.querySelector('.history-date-block');
