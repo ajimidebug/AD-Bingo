@@ -2734,13 +2734,14 @@ function buildGrid(){
 }
 
 function fixCellSquare(){
-  requestAnimationFrame(()=>{
+  const apply=()=>{
     const first=document.querySelector('.cell');
     if(!first)return;
     const w=first.offsetWidth;
-    if(!w)return;
+    if(!w){setTimeout(apply,50);return;}
     document.querySelectorAll('.cell').forEach(c=>c.style.height=w+'px');
-  });
+  };
+  requestAnimationFrame(apply);
 }
 window.addEventListener('resize',fixCellSquare);
 
