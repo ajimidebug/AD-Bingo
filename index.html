@@ -676,10 +676,10 @@ body.theme-night .timer-widget{background:var(--surface);}
     <p id="exportModalDesc">「复制迁移码」用于设备间迁移（base64格式）。「结构化导出」生成可读 JSON，方便导入微信小程序等平台。</p>
     <textarea class="export-textarea" id="exportTextarea" placeholder="在此粘贴导入码…"></textarea>
     <div class="export-btns">
-      <button class="export-btn export-btn-copy" id="exportCopyBtn" onclick="exportCopy()">复制迁移码</button>
-      <button class="export-btn" style="background:var(--green);color:#fff;" onclick="exportUnifiedCopy()">📋 结构化导出</button>
-      <button class="export-btn" style="background:var(--text-lt);color:#fff;" onclick="document.getElementById('exportTextarea').value=''">清空</button>
-      <button class="export-btn export-btn-import" onclick="importData()">导入数据</button>
+      <button class="export-btn" style="background:var(--done);color:#fff;" id="exportCopyBtn" onclick="exportCopy()">复制迁移码</button>
+      <button class="export-btn" style="background:var(--purple);color:#fff;" onclick="exportUnifiedCopy()">📋 结构化导出</button>
+      <button class="export-btn" style="background:var(--amber);color:#fff;" onclick="document.getElementById('exportTextarea').value=''">清空</button>
+      <button class="export-btn" style="background:var(--green);color:#fff;" onclick="importData()">导入数据</button>
       <button class="export-btn export-btn-close" onclick="closeExportModal()">关闭</button>
     </div>
   </div>
@@ -2547,21 +2547,16 @@ function openHistory(){
       const fmt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0')+'m':''):m+'m';
       // Multi-segment support
       if(t.segments&&t.segments.length){
-        // Header row: task name + total focus time
-        const totalFocusSecs=t.segments.reduce((a,s)=>a+(s.focusSecs||0),0);
-        const totalFocusMins=Math.round(totalFocusSecs/60);
-        const header='<div class="history-ts-item history-ts-header"><span class="history-ts-time">'+escHtml(t.name)+'</span><span class="history-ts-dur">共专注 '+fmt(totalFocusMins)+'</span></div>';
-        const segRows=t.segments.map(s=>{
+        return t.segments.map(s=>{
           const [sh,sm]=s.start.split(':').map(Number);
           const [eh,em]=s.end.split(':').map(Number);
           let totalMins=(eh*60+em)-(sh*60+sm);if(totalMins<0)totalMins+=1440;
           const focusMins=Math.round((s.focusSecs||0)/60);
           const pauseMins=totalMins-focusMins;
           let dur='专注 '+fmt(focusMins);
-          if(pauseMins>0)dur+=' · 暂停 '+fmt(pauseMins);
-          return '<div class="history-ts-item history-ts-seg"><span class="history-ts-time">'+s.start+' → '+s.end+'</span><span class="history-ts-dur">'+dur+'</span></div>';
+          if(pauseMins>0)dur+=' 暂停 '+fmt(pauseMins);
+          return '<div class="history-ts-item" style="flex-wrap:nowrap;gap:6px;"><span class="history-ts-time" style="white-space:nowrap;">'+s.start+' \u2192 '+s.end+'</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(t.name)+'</span><span class="history-ts-dur" style="flex-shrink:0;">'+dur+'</span></div>';
         }).join('');
-        return header+segRows;
       }
       // Legacy single entry
       let timeStr=t.time||'';
