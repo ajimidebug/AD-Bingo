@@ -2730,7 +2730,19 @@ function buildGrid(){
     }
     g.appendChild(c);
   }
+  fixCellSquare();
 }
+
+function fixCellSquare(){
+  requestAnimationFrame(()=>{
+    const first=document.querySelector('.cell');
+    if(!first)return;
+    const w=first.offsetWidth;
+    if(!w)return;
+    document.querySelectorAll('.cell').forEach(c=>c.style.height=w+'px');
+  });
+}
+window.addEventListener('resize',fixCellSquare);
 
 function toggle(pos){
   if(isCellLocked(pos)){
