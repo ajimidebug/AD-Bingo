@@ -530,7 +530,27 @@ body.theme-night .timer-widget{background:var(--surface);}
 .cal-save-btn{width:100%;padding:11px;border-radius:12px;border:none;background:var(--done);color:#fff;font-family:"Nunito","Noto Sans SC",sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;margin-top:8px;}
 .cal-empty{font-size:.82rem;color:var(--text-lt);font-weight:600;text-align:center;padding:16px;}
 
-/* Toasts */
+/* Subtask progress fill inside cell */
+.cell-progress-fill{position:absolute;bottom:0;left:0;width:100%;height:0%;background:var(--done);opacity:.35;transition:height .4s cubic-bezier(.4,0,.2,1);pointer-events:none;border-radius:0 0 9px 9px;}
+.cell.active .cell-progress-fill{display:none;}
+
+/* Subtask popup modal */
+.subtask-overlay{position:fixed;inset:0;z-index:2200;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);}
+.subtask-sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:20px 18px calc(16px + env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;}
+.subtask-title{font-size:.95rem;font-weight:900;color:var(--text);text-align:center;margin-bottom:4px;}
+.subtask-hint{font-size:.72rem;font-weight:600;color:var(--text-lt);text-align:center;margin-bottom:16px;}
+.subtask-progress-bar{height:6px;background:var(--purple-lt);border-radius:99px;overflow:hidden;margin-bottom:16px;}
+.subtask-progress-fill{height:100%;background:linear-gradient(90deg,var(--done),var(--green));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.subtask-list{overflow-y:auto;flex:1;}
+.subtask-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;background:var(--bg);margin-bottom:8px;cursor:pointer;transition:background .18s;user-select:none;}
+.subtask-item.done{background:var(--done-lt);}
+.subtask-item-check{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--text-lt);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:all .18s;}
+.subtask-item.done .subtask-item-check{background:var(--done);border-color:var(--done-dk);color:#fff;}
+.subtask-item-text{font-size:.88rem;font-weight:700;color:var(--text);flex:1;}
+.subtask-item.done .subtask-item-text{color:var(--text-lt);text-decoration:line-through;}
+.subtask-close-row{margin-top:14px;display:flex;gap:8px;}
+.subtask-close-btn{flex:1;padding:13px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.88rem;font-weight:800;cursor:pointer;}
+.subtask-incomplete-hint{font-size:.72rem;font-weight:700;color:var(--text-lt);text-align:center;margin-top:8px;min-height:1.2em;}
 .locked-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);background:rgba(44,44,60,.94);color:#fff;padding:16px 24px;border-radius:18px;font-size:.9rem;font-weight:800;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:260px;line-height:1.5;}
 .locked-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--text);color:#fff;padding:12px 26px;border-radius:99px;font-size:.82rem;font-weight:800;box-shadow:0 8px 28px rgba(0,0,0,.22);transition:transform .36s cubic-bezier(.4,0,.2,1),opacity .36s;z-index:999;white-space:nowrap;opacity:0;}
@@ -813,11 +833,11 @@ body.theme-night .timer-widget{background:var(--surface);}
       </div>
     </div>
     <div class="detail-row">
-      <div><div class="detail-row-label">🔒 强制完成</div><div class="detail-row-sub">未完成时其他格子将被锁住</div></div>
-      <label class="toggle-switch mandatory-toggle"><input type="checkbox" id="detailMandatoryToggle"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      <div><div class="detail-row-label">⚡ 强制任务</div><div class="detail-row-sub">未完成时，连线不计入 Bingo</div></div>
+      <label class="toggle-switch mandatory-toggle"><input type="checkbox" id="detailMandatoryToggle" onchange="onMandatoryToggleChange(this)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
     </div>
     <div class="detail-section-label">📝 今日备注</div>
-    <textarea class="detail-notes" id="detailNotes" placeholder="记录今天做了什么、有什么感受…" rows="3" autocomplete="off"></textarea>
+    <textarea class="detail-notes" id="detailNotes" placeholder="记录今天做了什么、有什么感受…" rows="3" autocomplete="off" onblur="autoSaveDetail()"></textarea>
     <div id="dailyHistSection" style="display:none;">
       <button class="daily-hist-toggle" id="dailyHistToggleBtn" onclick="toggleDailyHist()">▶ 查看往期备注</button>
       <div class="daily-hist-list" id="dailyHistList"></div>
@@ -983,6 +1003,7 @@ const totalCells=()=>gridSize*gridSize;
 let state=[];
 let order=[];
 let prevLines=0;
+let prevRawLines=0;
 let details={};
 let mandatory=new Set();
 let detailPos=-1;
@@ -1451,11 +1472,38 @@ function toggleTheme(){
 
 
 // ── Mandatory ─────────────────────────────────────────────────────────────────
-function isMandatoryBlocking(){
+function getMandatoryBlocking(){
+  // Returns the name of the first incomplete mandatory task, or null
   for(let p=0;p<totalCells();p++){if(mandatory.has(order[p])&&!state[p])return getTaskName(p);}
   return null;
 }
-function isCellLocked(pos){return !mandatory.has(order[pos])&&isMandatoryBlocking()!==null;}
+// Kept for backward compat (cells are no longer locked, always returns false)
+function isMandatoryBlocking(){return null;}
+function isCellLocked(pos){return false;}
+
+function onMandatoryToggleChange(checkbox){
+  if(checkbox.checked){
+    // Show reminder dialog when enabling
+    const taskName=detailPos>=0?getTaskName(detailPos):'该任务';
+    showMandatoryWarning(taskName);
+  }
+}
+
+function showMandatoryWarning(taskName){
+  let box=document.getElementById('mandatoryWarningBox');
+  if(box)box.remove();
+  box=document.createElement('div');
+  box.id='mandatoryWarningBox';
+  box.style.cssText='position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:20px;';
+  box.innerHTML=`<div style="background:var(--surface);border-radius:22px;padding:26px 22px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.22);text-align:center;">
+    <div style="font-size:2rem;margin-bottom:10px;">⚡</div>
+    <div style="font-size:.95rem;font-weight:900;color:var(--text);margin-bottom:10px;">已设为强制任务</div>
+    <div style="font-size:.82rem;font-weight:600;color:var(--text-mid);line-height:1.7;margin-bottom:20px;">今日若未完成<strong>「${escHtml(taskName)}」</strong>，<br>所有连线将不计入 Bingo。</div>
+    <button onclick="document.getElementById('mandatoryWarningBox').remove()" style="width:100%;padding:13px;border-radius:14px;border:none;background:var(--done);color:#fff;font-family:inherit;font-size:.9rem;font-weight:900;cursor:pointer;">别小看我！</button>
+  </div>`;
+  document.body.appendChild(box);
+  box.addEventListener('click',e=>{if(e.target===box)box.remove();});
+}
 
 // ── Sound ─────────────────────────────────────────────────────────────────────
 let actx=null;
@@ -2373,17 +2421,38 @@ function inheritTodos(){
   const existingTexts=new Set(existing.map(t=>t.text));
   const merged=[...existing,...src.todos.filter(t=>!existingTexts.has(t.text)).map(t=>({text:t.text,done:false}))];
   renderTodoList(merged);
+  autoSaveDetail();
   showToast('已继承上次子任务（未勾选）✓');
 }
 function closeDetail(){timerStop();document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailSheet').classList.remove('open');detailPos=-1;}
 function renderTodoList(todos){
   const list=document.getElementById('todoList');list.innerHTML='';
-  todos.forEach((todo,i)=>{const item=document.createElement('div');item.className='todo-item'+(todo.done?' done':'');item.innerHTML=`<div class="todo-check" onclick="toggleTodoItem(${i})"></div><input class="todo-text" value="${escHtml(todo.text)}" placeholder="子任务" maxlength="30" autocomplete="off"/><button class="todo-delete" onclick="deleteTodo(${i})">✕</button>`;list.appendChild(item);});
+  todos.forEach((todo,i)=>{const item=document.createElement('div');item.className='todo-item'+(todo.done?' done':'');item.innerHTML=`<div class="todo-check" onclick="toggleTodoItem(${i})"></div><input class="todo-text" value="${escHtml(todo.text)}" placeholder="子任务" maxlength="30" autocomplete="off" onblur="autoSaveDetail()"/><button class="todo-delete" onclick="deleteTodo(${i})">✕</button>`;list.appendChild(item);});
 }
 function getCurrentTodos(){return Array.from(document.querySelectorAll('.todo-item')).map(el=>({text:el.querySelector('.todo-text').value,done:el.classList.contains('done')}));}
-function toggleTodoItem(i){document.querySelectorAll('.todo-item')[i].classList.toggle('done');}
-function deleteTodo(i){const t=getCurrentTodos();t.splice(i,1);renderTodoList(t);}
-function addTodo(){const inp=document.getElementById('todoAddInput');const text=inp.value.trim();if(!text)return;renderTodoList([...getCurrentTodos(),{text,done:false}]);inp.value='';inp.focus();}
+function toggleTodoItem(i){document.querySelectorAll('.todo-item')[i].classList.toggle('done');autoSaveDetail();}
+function deleteTodo(i){const t=getCurrentTodos();t.splice(i,1);renderTodoList(t);autoSaveDetail();}
+function addTodo(){const inp=document.getElementById('todoAddInput');const text=inp.value.trim();if(!text)return;renderTodoList([...getCurrentTodos(),{text,done:false}]);inp.value='';inp.focus();autoSaveDetail();}
+
+function autoSaveDetail(){
+  if(detailPos<0)return;
+  const taskName=getTaskName(detailPos);
+  if(!taskName)return;
+  const todayNotes=document.getElementById('detailNotes').value;
+  const todayTodos=getCurrentTodos();
+  saveDetailDay(taskName,activeDate(),todayNotes,todayTodos);
+  // Also update template todos
+  if(!details[taskName]||typeof details[taskName].notes==='string'){
+    details[taskName]={byDate:{},template:{todos:[]}};
+  }
+  const allTodoTexts=new Set((details[taskName].template?.todos||[]).map(t=>t.text));
+  todayTodos.forEach(t=>{if(!allTodoTexts.has(t.text))allTodoTexts.add(t.text);});
+  details[taskName].template={todos:[...allTodoTexts].map(t=>({text:t,done:false}))};
+  ls.set(getUserKey('details'),JSON.stringify(details));
+  // Update note dot on grid
+  const c=document.querySelector(`.cell[data-i="${detailPos}"]`);
+  if(c){const dot=c.querySelector('.note-dot');if(dot)dot.classList.toggle('show',hasNoteOrTodo(taskName));}
+}
 
 function saveDetail(){
   if(detailPos<0)return;
@@ -2691,26 +2760,127 @@ function showCalPreview(ds,data){
   det.innerHTML=html;
 }
 
+// ── Subtask Popup ─────────────────────────────────────────────────────────────
+function openSubtaskPopup(pos, taskName, todosInit){
+  // todosInit: array from today's saved detail. Work on a local copy.
+  let todos=todosInit.map(t=>({...t}));
+
+  function calcPct(){return todos.length?Math.round(todos.filter(t=>t.done).length/todos.length*100):0;}
+
+  // Update cell fill
+  function updateCellFill(){
+    const c=document.querySelector(`.cell[data-i="${pos}"]`);
+    if(!c)return;
+    const pct=calcPct();
+    const f=c.querySelector('.cell-progress-fill');
+    if(f)f.style.height=pct+'%';
+  }
+
+  function renderItems(){
+    const list=document.getElementById('subtaskListInner');
+    if(!list)return;
+    list.innerHTML='';
+    todos.forEach((todo,i)=>{
+      const item=document.createElement('div');
+      item.className='subtask-item'+(todo.done?' done':'');
+      item.innerHTML=`<div class="subtask-item-check">${todo.done?'✓':''}</div><div class="subtask-item-text">${escHtml(todo.text)}</div>`;
+      item.onclick=()=>{
+        todos[i].done=!todos[i].done;
+        item.classList.toggle('done',todos[i].done);
+        item.querySelector('.subtask-item-check').textContent=todos[i].done?'✓':'';
+        // Save progress back
+        saveDetailDay(taskName,activeDate(),getDetailDay(taskName,activeDate()).notes||'',todos);
+        updateCellFill();
+        updatePopupProgress();
+        // Check if all done
+        if(todos.every(t=>t.done)){
+          vibrate([30,60]);
+          setTimeout(()=>{closePopup(true);},300);
+        }
+      };
+      list.appendChild(item);
+    });
+    updateCellFill();
+    updatePopupProgress();
+  }
+
+  function updatePopupProgress(){
+    const pct=calcPct();
+    const bar=document.getElementById('subtaskProgressFill');
+    if(bar)bar.style.width=pct+'%';
+    const hint=document.getElementById('subtaskIncompleteHint');
+    if(hint){
+      const done=todos.filter(t=>t.done).length,total=todos.length;
+      hint.textContent=done===total?'全部完成！✨':(total-done)+' 项未完成，完成全部后格子才会点亮';
+    }
+  }
+
+  function closePopup(complete){
+    const ov=document.getElementById('subtaskPopupOverlay');
+    if(ov)ov.remove();
+    if(complete){
+      // Mark cell done
+      state[pos]=true;
+      // Also update todos as all done in storage
+      saveDetailDay(taskName,activeDate(),getDetailDay(taskName,activeDate()).notes||'',todos.map(t=>({...t,done:true})));
+      save();
+      const c=document.querySelector(`.cell[data-i="${pos}"]`);
+      if(c){
+        // Clear fill since cell is now fully active
+        const f=c.querySelector('.cell-progress-fill');if(f)f.style.height='0%';
+        burstParticles(c);
+      }
+      playComplete();showCheer();recordTS(taskName);
+      render();buildGrid();checkAchievements();
+    } else {
+      // Save partial progress
+      saveDetailDay(taskName,activeDate(),getDetailDay(taskName,activeDate()).notes||'',todos);
+      updateCellFill();
+    }
+  }
+
+  // Build popup
+  let ov=document.getElementById('subtaskPopupOverlay');
+  if(ov)ov.remove();
+  ov=document.createElement('div');
+  ov.id='subtaskPopupOverlay';
+  ov.className='subtask-overlay';
+  ov.innerHTML=`<div class="subtask-sheet">
+    <div class="subtask-title">${escHtml(taskName)}</div>
+    <div class="subtask-hint">完成所有子任务，格子才会点亮 ✅</div>
+    <div class="subtask-progress-bar"><div class="subtask-progress-fill" id="subtaskProgressFill" style="width:0%"></div></div>
+    <div class="subtask-list" id="subtaskListInner"></div>
+    <div class="subtask-incomplete-hint" id="subtaskIncompleteHint"></div>
+    <div class="subtask-close-row">
+      <button class="subtask-close-btn" id="subtaskCloseBtn">稍后再说</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closePopup(false);});
+  document.getElementById('subtaskCloseBtn').onclick=()=>closePopup(false);
+  renderItems();
+}
+
 // ── Grid ──────────────────────────────────────────────────────────────────────
 function buildGrid(){
   const g=document.getElementById('bingoGrid');g.innerHTML='';
   g.style.gridTemplateColumns=`repeat(${gridSize},1fr)`;
-  const blocking=isMandatoryBlocking(),active=getActiveTasks();
+  const blocking=getMandatoryBlocking(),active=getActiveTasks();
   const fs={3:'1.05rem',4:'.88rem',5:'.72rem',6:'.6rem'}[gridSize]||'.72rem';
   for(let pos=0;pos<totalCells();pos++){
     const idx=order[pos],taskName=(idx<active.length)?active[idx]:'';
     const isEmpty=!taskName,pal=PALETTES[pos%PALETTES.length];
-    const locked=!isEmpty&&blocking!==null&&!mandatory.has(idx);
     const isMand=mandatory.has(idx);
     const c=document.createElement('div');
     let cls='cell';
     if(isEmpty)cls+=' empty';
-    else if(state[pos]&&!locked)cls+=' active';
-    else if(locked)cls+=' locked';
+    else if(state[pos])cls+=' active';
     else if(isMand&&!state[pos])cls+=' mandatory';
     c.className=cls;c.dataset.i=pos;c.dataset.bg=pal.bg;c.dataset.fg=pal.color;c.style.fontSize=fs;
-    if(!isEmpty&&!state[pos]&&!locked){c.style.background=pal.bg;c.style.color=pal.color;}
+    if(!isEmpty&&!state[pos]){c.style.background=pal.bg;c.style.color=pal.color;}
     const span=document.createElement('span');span.className='cell-text';span.textContent=taskName;c.appendChild(span);
+    // Subtask progress fill
+    const fill=document.createElement('div');fill.className='cell-progress-fill';c.appendChild(fill);
     if(isMand&&!isEmpty){const li=document.createElement('span');li.className='lock-icon';li.textContent='⚡';c.appendChild(li);}
     if(!isEmpty){const dot=document.createElement('span');dot.className='note-dot'+(hasNoteOrTodo(taskName)?' show':'');c.appendChild(dot);}
     if(!isEmpty){
@@ -2727,6 +2897,19 @@ function buildGrid(){
     g.appendChild(c);
   }
   fixCellSquare();
+  // Restore subtask progress fills
+  for(let pos=0;pos<totalCells();pos++){
+    if(state[pos])continue; // already done, no fill needed
+    const taskName=getTaskName(pos);
+    if(!taskName)continue;
+    const d=getDetail(taskName);
+    if(!d.todos||!d.todos.length)continue;
+    const pct=Math.round(d.todos.filter(t=>t.done).length/d.todos.length*100);
+    if(pct>0){
+      const c=document.querySelector(`.cell[data-i="${pos}"]`);
+      if(c){const f=c.querySelector('.cell-progress-fill');if(f)f.style.height=pct+'%';}
+    }
+  }
 }
 
 function fixCellSquare(){
@@ -2742,10 +2925,14 @@ function fixCellSquare(){
 window.addEventListener('resize',fixCellSquare);
 
 function toggle(pos){
-  if(isCellLocked(pos)){
-    vibrate([30,40,30]);const c=document.querySelector(`.cell[data-i="${pos}"]`);
-    c.classList.add('shake');c.addEventListener('animationend',()=>c.classList.remove('shake'),{once:true});
-    showLockedToast(`请先完成「${isMandatoryBlocking()}」⚡`);return;
+  // If cell has todos and is not yet done, show subtask popup
+  const taskName=getTaskName(pos);
+  if(!state[pos]&&taskName){
+    const d=getDetail(taskName);
+    if(d.todos&&d.todos.length>0){
+      openSubtaskPopup(pos,taskName,d.todos);
+      return;
+    }
   }
   state[pos]=!state[pos];save();
   const c=document.querySelector(`.cell[data-i="${pos}"]`);
@@ -2759,7 +2946,7 @@ function toggle(pos){
 }
 
 // ── Logic ─────────────────────────────────────────────────────────────────────
-function getLines(){
+function getRawLines(){
   const lines=[],s=gridSize;
   for(let r=0;r<s;r++){const row=Array.from({length:s},(_,c)=>r*s+c);if(row.every(i=>state[i]&&getTaskName(i)))lines.push(row);}
   for(let c=0;c<s;c++){const col=Array.from({length:s},(_,r)=>r*s+c);if(col.every(i=>state[i]&&getTaskName(i)))lines.push(col);}
@@ -2768,11 +2955,18 @@ function getLines(){
   if(d2.every(i=>state[i]&&getTaskName(i)))lines.push(d2);
   return lines;
 }
+function getLines(){
+  const blocking=getMandatoryBlocking();
+  if(blocking)return []; // suppress all lines when mandatory incomplete
+  return getRawLines();
+}
 function calcPct(done,lc){if(lc>0)return 100+Math.max(0,done-gridSize)*20;return Math.min(done*(100/gridSize),100);}
 const SUBS=["完成一项继续加油 💪","好的开始，保持节奏","已完成超过一半了！","快到终点了，冲！","还差一步就连线了","继续超越 🎉"];
 
 function render(){
   const done=state.filter(Boolean).length,lines=getLines(),n=lines.length;
+  const rawLines=getRawLines(),rawN=rawLines.length;
+  const blocking=getMandatoryBlocking();
   const pct=calcPct(done,n),visual=Math.min(pct,100);
   document.getElementById('ringFill').style.strokeDashoffset=CIRC*(1-visual/100);
   document.getElementById('ringLabel').textContent=Math.round(pct)+'%';
@@ -2780,15 +2974,19 @@ function render(){
   document.getElementById('progressSub').textContent=n>0?SUBS[5]:done===0?'完成一项继续加油 💪':SUBS[Math.min(Math.floor(done/gridSize*3),4)];
   const hint=document.getElementById('progressHint');
   if(n>0&&done>gridSize){hint.textContent=`已额外完成 ${done-gridSize} 项 · 总计 ${done} 项`;hint.style.color='var(--green-dk)';}
+  else if(blocking&&rawN>0){hint.textContent=`连线达成，但强制任务「${blocking}」未完成，暂不计入 Bingo`;hint.style.color='var(--amber-dk)';}
   else if(n===0&&done>0){hint.textContent=`已完成 ${done} 项`;hint.style.color='var(--done-dk)';}
   else hint.textContent='';
   const allIdx=new Set(lines.flat());
-  document.querySelectorAll('.cell').forEach(c=>{c.classList.remove('bingo-line');if(!state[+c.dataset.i]&&!c.classList.contains('locked')){c.style.background=c.dataset.bg;c.style.color=c.dataset.fg;}});
+  document.querySelectorAll('.cell').forEach(c=>{c.classList.remove('bingo-line');if(!state[+c.dataset.i]){c.style.background=c.dataset.bg;c.style.color=c.dataset.fg;}});
   allIdx.forEach(i=>{const c=document.querySelector(`.cell[data-i="${i}"]`);if(c){c.classList.add('bingo-line');c.style.background='';c.style.color='';}});
   document.getElementById('badgeText').textContent=`连成 ${n} 条线！`;
   document.getElementById('bingoBadge').classList.toggle('show',n>0);
+  // Show bingo modal only for real lines (not suppressed), or near-bingo if blocking
   if(n>prevLines){doConfetti();const cheer=nextMsg(BINGO_CHEERS,bingoQ);showBingoModal(n,cheer);vibrate([50,30,80]);playBingo();}
+  else if(n===0&&rawN>prevRawLines&&blocking){showNearBingoToast(blocking);}
   prevLines=n;
+  prevRawLines=rawN;
 }
 
 function doShuffle(){
@@ -2808,7 +3006,7 @@ function doShuffle(){
   }
   save();buildGrid();render();showToast('已随机排列 🔀');
 }
-function doReset(){state=Array(totalCells()).fill(false);prevLines=0;save();buildGrid();render();showToast('已重置');}
+function doReset(){state=Array(totalCells()).fill(false);prevLines=0;prevRawLines=0;save();buildGrid();render();showToast('已重置');}
 
 // ── Achievements ──────────────────────────────────────────────────────────────
 function saveAch(){ls.set(getUserKey('achievements'),JSON.stringify({unlocked:[...achUnlocked],custom:achCustom,userDefined:achUserDefined}));}
@@ -3111,7 +3309,8 @@ function showBubbleMenu(gi,ti){
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));">
       <div style="font-size:.85rem;font-weight:900;color:var(--text-mid);text-align:center;padding:4px 0 14px;border-bottom:1px solid var(--bg);margin-bottom:8px;">${escHtml(name)}${hasSchedule?' 📅':''}</div>
       <button id="bmRename" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--purple-lt);color:var(--purple);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">✏️ 修改名称</button>
-      <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 设置出现时间</button>
+      <button id="bmMoveGroup" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--green-lt);color:var(--green-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📂 修改分组</button>
+      <button id="bmSched" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--amber-lt);color:var(--amber-dk);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">📅 设置时间</button>
       <button id="bmDel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--coral-lt);color:#c05040;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">🗑️ 删除任务</button>
       <button id="bmCancel" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;text-align:center;">取消</button>
     </div>`;
@@ -3120,6 +3319,7 @@ function showBubbleMenu(gi,ti){
   menu.addEventListener('click',e=>{if(e.target===menu)close();});
   document.getElementById('bmCancel').onclick=close;
   document.getElementById('bmRename').onclick=()=>{close();showRenameDialog(gi,ti);};
+  document.getElementById('bmMoveGroup').onclick=()=>{close();showMoveGroupDialog(gi,ti);};
   document.getElementById('bmSched').onclick=()=>{close();openSchedSheet(gi,ti);};
   document.getElementById('bmDel').onclick=()=>{
     close();
@@ -3170,6 +3370,41 @@ function showRenameDialog(gi,ti){
   box.addEventListener('click',e=>{if(e.target===box)close();});
 }
 
+function showMoveGroupDialog(gi,ti){
+  if(!groups[gi]||!groups[gi].tasks[ti])return;
+  const task=groups[gi].tasks[ti];
+  const otherGroups=groups.map((g,i)=>({g,i})).filter(({i})=>i!==gi);
+  if(!otherGroups.length){showToast('只有一个分组，请先新建其他分组');return;}
+  let box=document.getElementById('moveGroupDialog');
+  if(box)box.remove();
+  box=document.createElement('div');
+  box.id='moveGroupDialog';
+  box.style.cssText='position:fixed;inset:0;z-index:2100;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.4);';
+  const btns=otherGroups.map(({g,i})=>`<button class="mg-btn" data-tgi="${i}" style="width:100%;padding:13px 14px;border-radius:12px;border:none;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;font-weight:800;cursor:pointer;margin-bottom:8px;text-align:left;">${escHtml(g.name)}</button>`).join('');
+  box.innerHTML=`<div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 16px calc(16px + env(safe-area-inset-bottom));">
+    <div style="font-size:.82rem;font-weight:900;color:var(--text-mid);text-align:center;padding:0 0 14px;border-bottom:1px solid var(--bg);margin-bottom:12px;">将「${escHtml(task.name)}」移到哪个分组？</div>
+    ${btns}
+    <button id="mgCancelBtn" style="width:100%;padding:13px;border-radius:12px;border:none;background:var(--bg);color:var(--text-mid);font-family:inherit;font-size:.88rem;font-weight:800;cursor:pointer;">取消</button>
+  </div>`;
+  document.body.appendChild(box);
+  const close=()=>box.remove();
+  document.getElementById('mgCancelBtn').onclick=close;
+  box.addEventListener('click',e=>{if(e.target===box)close();});
+  box.querySelectorAll('.mg-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      const tgi=+btn.dataset.tgi;
+      if(groups[gi]&&groups[gi].tasks[ti]){
+        const moved=groups[gi].tasks.splice(ti,1)[0];
+        groups[tgi].tasks.push(moved);
+        ls.set(getUserKey('groups'),JSON.stringify(groups));
+        renderTaskPanel();
+        showToast(`已移到「${groups[tgi].name}」✓`);
+      }
+      close();
+    };
+  });
+}
+
 function showConfirm(msg,onOk){
   let box=document.getElementById('customConfirm');
   if(!box){
@@ -3193,6 +3428,22 @@ function showConfirm(msg,onOk){
 }
 
 // ── BINGO Modal ───────────────────────────────────────────────────────────────
+let _nearBingoTimer=null;
+function showNearBingoToast(blocking){
+  // Show a prominent center toast instead of full bingo modal
+  let box=document.getElementById('nearBingoBox');
+  if(box)box.remove();
+  box=document.createElement('div');
+  box.id='nearBingoBox';
+  box.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);background:rgba(44,44,60,.94);color:#fff;padding:20px 24px;border-radius:20px;font-size:.88rem;font-weight:800;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:280px;line-height:1.6;';
+  box.innerHTML=`<div style="font-size:1.6rem;margin-bottom:6px;">🔒</div><div style="font-size:.95rem;font-weight:900;margin-bottom:6px;">连线达成，差一步！</div><div>强制任务「${escHtml(blocking)}」还未完成，完成它，Bingo 就是你的！</div>`;
+  document.body.appendChild(box);
+  requestAnimationFrame(()=>{box.style.opacity='1';box.style.transform='translate(-50%,-50%) scale(1)';});
+  clearTimeout(_nearBingoTimer);
+  _nearBingoTimer=setTimeout(()=>{box.style.opacity='0';box.style.transform='translate(-50%,-50%) scale(.85)';setTimeout(()=>box.remove(),300);},2800);
+  vibrate([30,40,30]);
+}
+
 let bingoModalTimer=null;
 function showBingoModal(lines,cheer){
   const emojis=['🎯','🏆','⚡','🔥','👑','🌟','💥','🎊'];
