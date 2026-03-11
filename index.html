@@ -2468,16 +2468,17 @@ function saveDetail(){
     const d2=activeDate();if(!timestamps[d2])timestamps[d2]=[];
     const idx3=timestamps[d2].findIndex(e=>e.name===newName);
     if(startTimeVisible&&startTimeVal){
-      if(idx3>=0)timestamps[d2][idx3].startTime=startTimeVal;
-      else timestamps[d2].push({name:newName,time:'',startTime:startTimeVal});
-      // Store focus/pause secs if timer was used this session
-      if(_timerLastFocusSecs>0){
-        const idx4=timestamps[d2].findIndex(e=>e.name===newName);
-        if(idx4>=0)timestamps[d2][idx4].focusSecs=_timerLastFocusSecs;
+      if(idx3>=0){
+        timestamps[d2][idx3].startTime=startTimeVal;
+        if(_timerLastFocusSecs>0)timestamps[d2][idx3].focusSecs=_timerLastFocusSecs;
       }
+      // Only create a new entry if this task already has a completion time (isDone)
+      // Don't create empty time='' orphan entries
     } else {
       if(idx3>=0){delete timestamps[d2][idx3].startTime;delete timestamps[d2][idx3].focusSecs;}
     }
+    // Clean up any orphan entries (time='' and no segments) for this task
+    timestamps[d2]=timestamps[d2].filter(e=>e.name!==newName||(e.time&&e.time!=='')||(e.segments&&e.segments.length>0));
     ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
   }
   // If done, apply any manual completion time edit
@@ -2601,7 +2602,9 @@ function openHistory(){
   entries.forEach(e=>{
     const dt=new Date(e.dateStr+'T12:00:00'),isToday=e.dateStr===todayStr();
     const done=e.done??(e.state?e.state.filter(Boolean).length:0),lines=e.lines??0,pct=e.pct??Math.min(done*20,100);
-    const ts=timestamps[e.dateStr]||[];
+    const tsRaw=timestamps[e.dateStr]||[];
+    // Only show entries that have a meaningful completion time or timer segments
+    const ts=tsRaw.filter(t=>(t.time&&t.time!=='')||(t.segments&&t.segments.length>0));
     if(pct===0&&done===0&&!ts.length)return;
     const item=document.createElement('div');item.className='history-item';
     item.innerHTML=`<div class="history-item-header"><div class="history-date-block" data-date="${e.dateStr}"><div class="history-month">${isToday?'今天':M[dt.getMonth()]}</div><div class="history-day">${dt.getDate()}</div><div class="history-weekday">${W[dt.getDay()]}</div></div><div class="history-info"><div class="history-pct">${pct}% 完成</div><div class="history-sub">勾选了 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div><div class="history-bar-bg"><div class="history-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div><div class="history-bingo ${lines>0?'show':''}">BINGO</div></div>${ts.length?`<div class="history-expand" onclick="this.nextElementSibling.classList.toggle('open')">▶ 查看完成时间 (${ts.length})</div><div class="history-timestamps">${ts.map(t=>{
@@ -2724,7 +2727,7 @@ function showCalPreview(ds,data){
   const dt=new Date(ds+'T12:00:00');
   const W=['日','一','二','三','四','五','六'],isToday=ds===todayStr();
   const done=data?(data.done??0):0,lines=data?(data.lines??0):0,pct=data?(data.pct??0):0;
-  const ts=(timestamps[ds]||[]);
+  const ts=(timestamps[ds]||[]).filter(t=>(t.time&&t.time!=='')||(t.segments&&t.segments.length>0));
   let html=`<div class="cal-detail-card">
     <div class="cal-detail-date">${dt.getMonth()+1}月${dt.getDate()}日 周${W[dt.getDay()]}${isToday?' · 今天':''}</div>`;
   if(data){html+=`<div class="cal-detail-pct">完成 ${pct}% · 勾选 ${done} 项${lines>0?` · ${lines} 条连线`:''}</div>`;}
