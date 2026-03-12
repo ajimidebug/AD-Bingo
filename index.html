@@ -904,7 +904,7 @@ body.theme-night .timer-widget{background:var(--surface);}
     <div class="date-line" id="dateDisplay"></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <div class="viewing-banner" id="viewingBanner"></div>
-      <button class="btn-icon" id="returnTodayBtn" onclick="returnToToday()" title="返回今天" style="display:none;background:var(--coral-lt);color:var(--coral);font-size:.75rem;padding:4px 10px;height:auto;border-radius:99px;font-weight:800;">↩ 返回今天</button>
+      <button class="btn-icon" id="returnTodayBtn" onclick="returnToToday()" title="返回今天" style="display:none;background:var(--coral-lt);color:var(--coral);">↩</button>
     </div>
   </div>
   <div class="header-right">
@@ -1180,6 +1180,22 @@ function loadAll(){
   try{const s=ls.get(mKey)||ls.get(K.mand);if(s)mandatory=new Set(JSON.parse(s));}catch(e){}
   try{const s=ls.get(K.name);if(s){appName='Life Bingo';document.getElementById('titleDisplay').textContent='Life Bingo';document.title='Life Bingo';ls.set(K.name,'Life Bingo');}}catch(e){}
   try{const s=ls.get(tKey)||ls.get(K.ts);if(s)timestamps=JSON.parse(s);}catch(e){}
+  // One-time cleanup: deduplicate timestamps per day (keep last entry per task name, remove empty-time orphans)
+  try{
+    let tsChanged=false;
+    for(const d of Object.keys(timestamps)){
+      const arr=timestamps[d];
+      if(!Array.isArray(arr))continue;
+      // Remove orphans (no time, no segments)
+      const cleaned=arr.filter(t=>(t.time&&t.time!=='')||(t.segments&&t.segments.length>0));
+      // Deduplicate: keep last occurrence of each task name
+      const seen=new Map();
+      for(const t of cleaned)seen.set(t.name,t);
+      const deduped=[...seen.values()];
+      if(deduped.length!==arr.length){timestamps[d]=deduped;tsChanged=true;}
+    }
+    if(tsChanged)ls.set(getUserKey('timestamps'),JSON.stringify(timestamps));
+  }catch(e){}
   try{const s=ls.get(K.size);if(s){gridSize=parseInt(s)||5;updateSizeBtns();}}catch(e){}
   try{const s=ls.get(getUserKey('achievements'));if(s){const d=JSON.parse(s);achUnlocked=new Set(d.unlocked||[]);achCustom=d.custom||{};achUserDefined=d.userDefined||[];}}catch(e){}
 }
@@ -1504,7 +1520,7 @@ function showMandatoryWarning(taskName){
 let actx=null;
 const getCtx=()=>{if(!actx)try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return actx;};
 function tone(f,dur,vol=0.35){try{const c=getCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
-function playComplete(){try{const c=getCtx();if(!c)return;const t=c.currentTime;[[880,0,0.18],[1320,0.06,0.13]].forEach(([f,dt,dur])=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(0.32,t+dt+0.012);g.gain.exponentialRampToValueAtTime(0.001,t+dt+dur);o.start(t+dt);o.stop(t+dt+dur+0.01);});}catch(e){}}
+function playComplete(){try{const c=getCtx();if(!c)return;const t=c.currentTime;[[523.25,0,0.5],[783.99,0.07,0.38]].forEach(([f,dt,dur])=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(0.28,t+dt+0.022);g.gain.setTargetAtTime(0.001,t+dt+0.04,dur*0.28);o.start(t+dt);o.stop(t+dt+dur+0.05);});}catch(e){}}
 function playUndo(){tone(440,.15,.18);setTimeout(()=>tone(220,.15,.12),60);}
 function playBingo(){[[523,0],[659,.12],[784,.24],[1047,.36],[1318,.5]].forEach(([f,t])=>setTimeout(()=>tone(f,.3,.38),t*1000));}
 
