@@ -1182,6 +1182,10 @@ function load(){
       }
       if(bestDate){
         const prev=JSON.parse(ls.get(prefix+bestDate));
+        // Inherit gridSize from previous day
+        if(prev&&prev.gridSize&&[3,4,5,6].includes(prev.gridSize)){
+          gridSize=prev.gridSize;updateSizeBtns();
+        }
         if(prev&&Array.isArray(prev.order)){
           // Use saved orderedTaskNames if available (accurate), otherwise fall back to reconstruction
           const prevOrdered=Array.isArray(prev.orderedTaskNames)&&prev.orderedTaskNames.length>0
@@ -1446,6 +1450,8 @@ function getPastDailyEntries(taskName){
 
 // ── Viewing date ──────────────────────────────────────────────────────────────
 function setViewingDate(ds){
+  // Auto-save any open detail panel notes before switching
+  if(detailPos>=0) autoSaveDetail();
   // Save current date's state before switching away
   if(!viewingDate) save();
   viewingDate=(ds===todayStr())?null:ds;
@@ -1517,13 +1523,18 @@ function setSize(n){
     const extra=allIdxs.filter(i=>!usedSet.has(i));
     newOrder=[...order,...extra];
   } else {
-    // Shrinking: shuffle done tasks first, then others
-    const doneIdxs=[], otherIdxs=[];
-    for(let i=0;i<activeTasks.length;i++){
-      (doneNames.has(activeTasks[i])?doneIdxs:otherIdxs).push(i);
+    // Shrinking: keep original relative order, done cells get priority over undone
+    const doneInOrder=[], undoneInOrder=[];
+    for(let pos=0;pos<order.length;pos++){
+      const idx=order[pos];
+      if(idx<activeTasks.length&&doneNames.has(activeTasks[idx])) doneInOrder.push(idx);
+      else if(idx<activeTasks.length) undoneInOrder.push(idx);
     }
-    for(let i=doneIdxs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[doneIdxs[i],doneIdxs[j]]=[doneIdxs[j],doneIdxs[i]];}
-    newOrder=[...doneIdxs,...otherIdxs];
+    const slots=n*n;
+    const kept=[...doneInOrder];
+    for(let i=0;kept.length<slots&&i<undoneInOrder.length;i++) kept.push(undoneInOrder[i]);
+    const keptSet=new Set(kept);
+    newOrder=order.filter(idx=>keptSet.has(idx)).slice(0,slots);
   }
   // Pad with any remaining unused indices, then trim to n*n
   const usedSet=new Set(newOrder);
@@ -2219,7 +2230,32 @@ function addGroup(){
 }
 function addTaskToGroup(gi,inp){const n=inp.value.trim();if(!n)return;groups[gi].tasks.push({name:n,active:true});inp.value='';ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();inp.focus();}
 function selectAllTasks(val){groups.forEach(g=>g.tasks.forEach(t=>{if(!taskHasSchedule(t))t.active=val;}));ls.set(getUserKey('groups'),JSON.stringify(groups));renderTaskPanel();}
-function applyTaskSelection(){order=[...Array(totalCells()).keys()];state=Array(totalCells()).fill(false);prevLines=0;save();closeTaskPanel();buildGrid();render();showToast('任务列表已更新 ✓');}
+function applyTaskSelection(){
+  // Preserve done-by-name so checked cells survive task list changes
+  const activeTasks=getActiveTasks();
+  const doneNames=new Set();
+  for(let pos=0;pos<state.length;pos++){if(state[pos]){const nm=getTaskName(pos);if(nm)doneNames.add(nm);}}
+  // Rebuild order: keep slots that still exist, append newly added tasks at the end
+  const nameToIdx={};activeTasks.forEach((n,i)=>nameToIdx[n]=i);
+  const used=new Set();
+  const kept=[];
+  // Walk existing order — keep slots whose task still exists
+  for(const idx of order){
+    if(idx<activeTasks.length&&!used.has(idx)){kept.push(idx);used.add(idx);}
+  }
+  // Append any brand-new task indices not yet in order
+  for(let i=0;i<activeTasks.length;i++){if(!used.has(i)){kept.push(i);used.add(i);}}
+  // Pad with placeholders if needed, trim to grid size
+  while(kept.length<totalCells())kept.push(kept.length);
+  order=kept.slice(0,totalCells());
+  // Restore state by task name
+  state=Array(totalCells()).fill(false);
+  for(let pos=0;pos<totalCells();pos++){
+    const idx=order[pos];
+    if(idx<activeTasks.length&&doneNames.has(activeTasks[idx]))state[pos]=true;
+  }
+  prevLines=0;save();closeTaskPanel();buildGrid();render();showToast('任务列表已更新 ✓');
+}
 
 // ── Schedule Sheet ────────────────────────────────────────────────────────────
 let _schedGi=-1,_schedTi=-1;
