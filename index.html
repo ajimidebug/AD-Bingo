@@ -1166,6 +1166,45 @@ function load(){
   }catch(e){}
   if(state.length!==totalCells()){state=Array(totalCells()).fill(false);}
   if(order.length!==totalCells()){order=[...Array(totalCells()).keys()];}
+
+  // New day: inherit yesterday's grid layout by task name
+  if(!hasSavedRecord && !viewingDate){
+    try{
+      // Find most recent past record
+      const prefix=userPrefix();
+      const today=todayStr();
+      let bestDate=null;
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);if(!key.startsWith(prefix))continue;
+        const d=key.replace(prefix,'');
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||d>=today)continue;
+        if(!bestDate||d>bestDate)bestDate=d;
+      }
+      if(bestDate){
+        const prev=JSON.parse(ls.get(prefix+bestDate));
+        if(prev&&Array.isArray(prev.order)){
+          // Use saved orderedTaskNames if available (accurate), otherwise fall back to reconstruction
+          const prevOrdered=Array.isArray(prev.orderedTaskNames)&&prev.orderedTaskNames.length>0
+            ? prev.orderedTaskNames
+            : prev.order.map(idx=>{const t=getEffectiveActiveTasks(bestDate);return idx<t.length?t[idx].name:null;}).filter(Boolean);
+          if(prevOrdered.length>0){
+            const todayTasks=getActiveTasks();
+            const todaySet=new Set(todayTasks);
+            const todayIndexOf={};
+            todayTasks.forEach((n,i)=>todayIndexOf[n]=i);
+            const newOrder=[];
+            const used=new Set();
+            prevOrdered.forEach(name=>{
+              if(todaySet.has(name)&&!used.has(name)){newOrder.push(todayIndexOf[name]);used.add(name);}
+            });
+            todayTasks.forEach((name,i)=>{if(!used.has(name)){newOrder.push(i);used.add(name);}});
+            order=newOrder;
+          }
+        }
+      }
+    }catch(e){}
+  }
+
   // Only check schedule overflow for today, and only if there's no saved record
   // (if a record exists, the user already chose a grid size — respect it)
   if(!viewingDate&&!hasSavedRecord) setTimeout(()=>checkScheduleOverflow(todayStr()),200);
@@ -1176,7 +1215,10 @@ function save(){
     // Snapshot which task names are active (manual selection, not schedule-derived)
     const activeSnapshot=[];
     for(const g of groups) for(const t of g.tasks) if(t.active) activeSnapshot.push(t.name);
-    ls.set(activeKey(),JSON.stringify({state,order,done,lines,pct,gridSize,activeSnapshot}));
+    // Also save task names in grid order — used by next day to inherit layout
+    const activeTasks2=getActiveTasks();
+    const orderedTaskNames=order.map(idx=>idx<activeTasks2.length?activeTasks2[idx]:null).filter(Boolean);
+    ls.set(activeKey(),JSON.stringify({state,order,done,lines,pct,gridSize,activeSnapshot,orderedTaskNames}));
   }catch(e){}
 }
 
@@ -1315,8 +1357,8 @@ function getEffectiveActiveTasks(dateStr){
     for(const t of g.tasks){
       const hasSchedule=taskHasSchedule(t);
       if(hasSchedule){
-        // appears if date matches schedule OR manually active
-        if(taskActiveOnDate(t,dateStr)||t.active) result.push({name:t.name,fromSchedule:true});
+        // appears only if date matches schedule rules
+        if(taskActiveOnDate(t,dateStr)) result.push({name:t.name,fromSchedule:true});
       } else {
         if(t.active) result.push({name:t.name,fromSchedule:false});
       }
