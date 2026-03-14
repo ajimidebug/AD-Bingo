@@ -166,7 +166,7 @@ body.theme-vapor .cell.locked{background:#110820!important;color:#2a1040!importa
 body.theme-zen{
   --bg:#f7f4ee;--surface:#fdfaf5;
   --done:#8b7355;--done-dk:#5c4a2a;--done-lt:#ede8df;
-  --green:#6b8c6b;--green-dk:#3d5c3d;--green-lt:#e4eee4;
+  --green:#6b8c6b;--green-dk:#5c4a2a;--green-lt:#ede8df;
   --amber:#c4a35a;--amber-dk:#8a6a20;--amber-lt:#f5edd8;
   --purple:#9b8ea0;--purple-lt:#ece8f0;
   --coral:#b07060;--coral-lt:#f0e4e0;
@@ -185,30 +185,35 @@ body.theme-zen .grid-card{border-radius:16px!important;}
 
 /* ── 各主题标题字体 ── */
 /* 默认：PingFang/Noto（不变，已在 .title 里） */
+body:not([class*="theme-"]) .title, body.theme-color .title{color:#7dcfaa!important;}
+body:not([class*="theme-"]) .progress-card-title, body.theme-color .progress-card-title{color:#7dcfaa!important;}
+body.theme-mono .title .title-letter, body.theme-mono .title{color:#4a4a4a!important;}
+body.theme-cyber .title .title-letter, body.theme-cyber .title{color:#ff8c00!important;text-shadow:0 0 8px rgba(255,140,0,.6)!important;}
+body.theme-zen .title .title-letter, body.theme-zen .title{color:#8b7355!important;}
+body.theme-matcha .title .title-letter, body.theme-matcha .title{color:#4a7a55!important;}
+body.theme-ocean .title .title-letter, body.theme-ocean .title{color:#4dd0e1!important;text-shadow:0 0 12px rgba(77,208,225,.5)!important;}
 body.theme-ocean .title{
   font-family:"Orbitron","Nunito",sans-serif!important;
   font-size:1.25rem!important;letter-spacing:.08em;
-  color:#4dd0e1;text-shadow:0 0 12px rgba(77,208,225,.5);
 }
 body.theme-matcha .title{
   font-family:"Noto Serif SC","Noto Sans SC","PingFang SC",serif!important;
-  font-weight:700!important;letter-spacing:.06em;color:#3d7a52;
+  font-weight:700!important;letter-spacing:.06em;
 }
 body.theme-mono .title{
   font-family:"Courier New",Courier,monospace!important;
-  font-weight:900!important;letter-spacing:.03em;color:#222;
+  font-weight:900!important;letter-spacing:.03em;
 }
 body.theme-cyber .title{
   font-family:"Orbitron","Nunito",sans-serif!important;
   font-size:1.15rem!important;font-weight:900!important;
-  letter-spacing:.12em;color:#f5e642;
-  text-shadow:0 0 8px rgba(245,230,66,.7),0 0 20px rgba(245,230,66,.3);
+  letter-spacing:.12em;
   text-transform:uppercase;
 }
 
 body.theme-zen .title{
   font-family:"Noto Serif SC","STSong","SimSun",serif!important;
-  font-weight:700!important;letter-spacing:.18em;color:#5c4a2a;
+  font-weight:700!important;letter-spacing:.18em;
   font-size:1.35rem!important;
 }
 body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:max(24px,env(safe-area-inset-top)) 16px max(70px,calc(70px + env(safe-area-inset-bottom))) max(16px,env(safe-area-inset-left));color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
@@ -230,7 +235,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 /* Progress */
 .progress-card{width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow);opacity:0;animation:up .45s .07s ease forwards;}
 .progress-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.progress-card-title{font-size:1rem;font-weight:900;color:var(--text);}
+.progress-card-title{font-size:1rem;font-weight:900;color:var(--done-dk);}
 .progress-card-sub{font-size:.72rem;font-weight:600;color:var(--text-lt);margin-top:2px;}
 .ring-wrap{position:relative;width:60px;height:60px;flex-shrink:0;}
 .ring-wrap svg{transform:rotate(-90deg);display:block;}
@@ -247,7 +252,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .cheer-banner.show{opacity:1;}
 .cheer-text{font-size:.82rem;font-weight:800;color:var(--done-dk);background:var(--done-lt);border-radius:99px;padding:5px 16px;line-height:1.4;display:inline-block;}
 /* Badge */
-.badge{display:none;align-items:center;gap:5px;background:var(--amber-lt);border:1.5px solid #f7d99a;border-radius:99px;padding:5px 13px;font-size:.73rem;font-weight:800;color:var(--amber-dk);flex-shrink:0;}
+.badge{display:none;align-items:center;gap:5px;background:var(--done-lt);border:1.5px solid var(--done);border-radius:99px;padding:5px 13px;font-size:.73rem;font-weight:800;color:var(--done-dk);flex-shrink:0;}
 .badge.show{display:flex;}
 
 /* Size - now inside task panel */
@@ -271,7 +276,7 @@ body{background:var(--bg);font-family:"Nunito","Noto Sans SC",sans-serif;min-hei
 .cell.pressing{transform:scale(.9);opacity:.7;}
 .cell.active{background:var(--done)!important;color:#fff!important;border-color:var(--done-dk);box-shadow:0 4px 12px rgba(137,207,240,.4);}
 .cell.bingo-line{background:var(--green)!important;color:#fff!important;border-color:var(--green-dk);box-shadow:0 4px 14px rgba(125,207,170,.45);}
-.cell.bingo-line .cell-text::after{content:'★';position:absolute;top:2px;right:3px;font-size:.48rem;opacity:.85;}
+.cell.bingo-line .cell-text::after{content:'';}
 .cell.mandatory{border-color:var(--coral)!important;}
 .cell.mandatory .lock-icon{position:absolute;top:2px;left:3px;font-size:.48rem;}
 .cell.locked{background:#e8eaed!important;color:#b0b8c4!important;border-color:transparent!important;cursor:not-allowed;box-shadow:none!important;}
@@ -908,7 +913,7 @@ body.theme-night .timer-widget{background:var(--surface);}
 <!-- Header -->
 <div class="header">
   <div class="header-left">
-    <div id="titleDisplay" class="title" style="cursor:default;user-select:none;-webkit-user-select:none;">Life Bingo</div>
+    <div id="titleDisplay" class="title" style="cursor:default;user-select:none;-webkit-user-select:none;"><span class="title-letter" style="color:#c3b1e1">L</span><span class="title-letter" style="color:#b0b8e8">i</span><span class="title-letter" style="color:#9dc0ef">f</span><span class="title-letter" style="color:#89cff0">e</span><span class="title-letter" style="color:#89cff0"> </span><span class="title-letter" style="color:#82cce0">B</span><span class="title-letter" style="color:#7dcfaa">i</span><span class="title-letter" style="color:#7dcfaa">n</span><span class="title-letter" style="color:#7dcfaa">g</span><span class="title-letter" style="color:#7dcfaa">o</span></div>
     <div class="date-line" id="dateDisplay"></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <div class="viewing-banner" id="viewingBanner"></div>
@@ -918,7 +923,7 @@ body.theme-night .timer-widget{background:var(--surface);}
   <div class="header-right">
     <div id="userBadgeBtn" onclick="openLoginModal()" style="display:none;"></div>
     <button class="btn-icon" onclick="doShuffle()" title="随机">🔀</button>
-    <button class="btn-icon" onclick="doReset()" title="重置">↺</button>
+    <button class="btn-icon" onclick="doReset()" title="重置">🗑️</button>
     <button class="btn-icon" onclick="toggleTheme()" id="themeBtn" title="主题">🎨</button>
   </div>
 </div>
@@ -948,11 +953,11 @@ body.theme-night .timer-widget{background:var(--surface);}
 
 <div class="bottom">
   <button class="btn" style="background:var(--done-lt);color:var(--done-dk);flex:1;" onclick="openTaskPanel()">📋 任务</button>
-  <button class="btn" style="background:var(--purple-lt);color:#7b5ea7;flex:1;" onclick="openTemplatePanel()">🗂️ 模板</button>
-  <button class="btn" style="background:var(--amber-lt);color:var(--amber-dk);flex:1;" onclick="openCal()">📅 日历</button>
+  <button class="btn" style="background:var(--green-lt);color:var(--green-dk);flex:1;" onclick="openTemplatePanel()">🗂️ 模板</button>
+  <button class="btn" style="background:var(--done-lt);color:var(--done-dk);flex:1;" onclick="openCal()">📅 日历</button>
   <button class="btn" style="background:var(--green-lt);color:var(--green-dk);flex:1;" onclick="openHistory()">🕐 历史</button>
-  <button class="btn" style="background:var(--coral-lt);color:var(--coral);flex:0 0 auto;padding:13px 12px;" onclick="openAchGallery()">🏅</button>
-  <button class="btn" style="background:var(--purple-lt);color:#7b5ea7;flex:0 0 auto;padding:13px 12px;" onclick="openExportModal(false)">📦</button>
+  <button class="btn" style="background:var(--done-lt);color:var(--done-dk);flex:0 0 auto;padding:13px 12px;" onclick="openAchGallery()">🏅</button>
+  <button class="btn" style="background:var(--green-lt);color:var(--green-dk);flex:0 0 auto;padding:13px 12px;" onclick="openExportModal(false)">📦</button>
 </div>
 
 <!-- Template Panel -->
@@ -1767,8 +1772,10 @@ function showMandatoryWarning(taskName){
 let actx=null;
 const getCtx=()=>{if(!actx)try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return actx;};
 function tone(f,dur,vol=0.35){try{const c=getCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
-function playComplete(){[[783.99,0],[1046.50,0.07]].forEach(([f,t])=>setTimeout(()=>tone(f,.13,.32),t*1000));}
-function playUndo(){[[783.99,0],[587.33,0.07]].forEach(([f,t])=>setTimeout(()=>tone(f,.13,.25),t*1000));}
+const COL_FREQS=[523.25,587.33,659.25,698.46,783.99,880.00]; // do re mi fa sol la (C5~A5)
+function colFreq(col){return COL_FREQS[Math.min(col,COL_FREQS.length-1)];}
+function playComplete(col=4){const f=colFreq(col);[[f,0],[f*2,0.07]].forEach(([freq,t])=>setTimeout(()=>tone(freq,.13,.32),t*1000));}
+function playUndo(col=4){const f=colFreq(col);[[f*2,0],[f,0.07]].forEach(([freq,t])=>setTimeout(()=>tone(freq,.13,.25),t*1000));}
 function playBingo(){[[523,0],[659,.12],[784,.24],[1047,.36],[1318,.5]].forEach(([f,t])=>setTimeout(()=>tone(f,.3,.38),t*1000));}
 
 // ── Haptic ────────────────────────────────────────────────────────────────────
@@ -2831,7 +2838,7 @@ function saveDetail(){
   todayTodos.forEach(t=>{if(!allTodoTexts.has(t.text))allTodoTexts.add(t.text);});
   details[newName].template={todos:[...allTodoTexts].map(t=>({text:t,done:false}))};
   ls.set(getUserKey('details'),JSON.stringify(details));touch();save();
-  if(isDone&&!wasDone){vibrate([30,60]);const c=document.querySelector(`.cell[data-i="${detailPos}"]`);if(c){burstParticles(c);playComplete();}showCheer();}
+  if(isDone&&!wasDone){vibrate([30,60]);const c=document.querySelector(`.cell[data-i="${detailPos}"]`);if(c){burstParticles(c);playComplete(detailPos%gridSize);}showCheer();}
   closeDetail();render();buildGrid();checkAchievements();showToast('已保存 ✓');
 }
 
@@ -3336,7 +3343,7 @@ function openSubtaskPopup(pos, taskName, todosInit){
         const f=c.querySelector('.cell-progress-fill');if(f)f.style.height='0%';
         burstParticles(c);
       }
-      playComplete();showCheer();recordTS(taskName);
+      playComplete(pos%gridSize);showCheer();recordTS(taskName);
       render();buildGrid();checkAchievements();
     } else {
       // Save partial progress
@@ -3446,8 +3453,9 @@ function toggle(pos){
   if(!state[pos]){c.style.background=c.dataset.bg;c.style.color=c.dataset.fg;}else{c.style.background='';c.style.color='';}
   c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');
   c.addEventListener('animationend',()=>c.classList.remove('pop'),{once:true});
-  if(state[pos]){vibrate([30,60]);burstParticles(c);playComplete();showCheer();recordTS(getTaskName(pos));}
-  else{vibrate(20);playUndo();removeTS(getTaskName(pos));syncTimestampsToState();}
+  const col=pos%gridSize;
+  if(state[pos]){vibrate([30,60]);burstParticles(c);playComplete(col);showCheer();recordTS(getTaskName(pos));}
+  else{vibrate(20);playUndo(col);removeTS(getTaskName(pos));syncTimestampsToState();}
   render();buildGrid();checkAchievements();
 }
 
