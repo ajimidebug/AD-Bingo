@@ -1542,9 +1542,11 @@ function setViewingDate(ds){
     // load that day — restore gridSize + activeSnapshot saved with that day's data
     try{
       const s=ls.get(activeKey()); // activeKey() now uses viewingDate
-      if(s&&JSON.parse(s).touched){
+      const _p=s?JSON.parse(s):null;
+      // 兼容旧版本：旧记录可能没有 touched 字段，只要有 state 或 done 数据就视为有效
+      if(s&&_p&&(_p.touched||Array.isArray(_p.state)||typeof _p.done==='number')){
         // Only use saved record if user actually did something that day
-        const d=JSON.parse(s);
+        const d=_p;
         if(d.gridSize&&[3,4,5,6].includes(d.gridSize)){gridSize=d.gridSize;updateSizeBtns();}
         if(Array.isArray(d.state))state=d.state;
         if(Array.isArray(d.order))order=d.order;
