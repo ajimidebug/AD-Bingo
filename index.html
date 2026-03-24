@@ -2465,9 +2465,36 @@ function randomPickTasks(){
   }
   const slotsLeft=needed-locked.length;
   if(free.length<slotsLeft){showToast(`任务不足 ${needed} 个，请再添加一些`);return;}
-  // Shuffle free pool and pick what's needed
-  for(let i=free.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[free[i],free[j]]=[free[j],free[i]];}
-  const picked=new Set([...locked,...free.slice(0,slotsLeft)].map(({gi,ti})=>`${gi}_${ti}`));
+  // Group-based prioritization: prioritize tasks from earlier groups
+  // 1. Sort free tasks by group index (gi) first
+  free.sort((a,b)=>a.gi-b.gi);
+  
+  // 2. For each group, shuffle tasks within the group
+  let groupedFree=[];
+  let currentGroup=-1;
+  let groupTasks=[];
+  
+  for(const task of free){
+    if(task.gi!==currentGroup){
+      if(groupTasks.length>0){
+        // Shuffle current group tasks
+        for(let i=groupTasks.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[groupTasks[i],groupTasks[j]]=[groupTasks[j],groupTasks[i]];}
+        groupedFree.push(...groupTasks);
+        groupTasks=[];
+      }
+      currentGroup=task.gi;
+    }
+    groupTasks.push(task);
+  }
+  
+  // Add the last group
+  if(groupTasks.length>0){
+    for(let i=groupTasks.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[groupTasks[i],groupTasks[j]]=[groupTasks[j],groupTasks[i]];}
+    groupedFree.push(...groupTasks);
+  }
+  
+  // 3. Pick tasks in group priority order
+  const picked=new Set([...locked,...groupedFree.slice(0,slotsLeft)].map(({gi,ti})=>`${gi}_${ti}`));
   for(let gi=0;gi<groups.length;gi++)for(let ti=0;ti<groups[gi].tasks.length;ti++)groups[gi].tasks[ti].active=picked.has(`${gi}_${ti}`);
   ls.set(getUserKey('groups'),JSON.stringify(groups));
   renderTaskPanel();
